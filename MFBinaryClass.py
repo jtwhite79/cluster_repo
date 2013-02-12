@@ -889,21 +889,42 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
         self.h = numpy.zeros((self.nlay, self.nrow, self.ncol),dtype='float')+1.0E+32
         #open binary head file
         self.file=open(filename,'rb')
+        self.times = self.time_list()
+        
+        self.totim = -999
+        self.kper = -999
+        self.kstp = -999
+        self.ntrans = -999
+
+
+
+    def get_time_list(self):
+        return self.times
+
+
+    def get_array(self,iposition):
+        self.file.seek(iposition)
+        totim,h,kstp,kper,success = self.next()
+        if success == True:        
+            return totim,kstp,kper,h,True
+        else:
+            return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
+
 
     def read_header(self):
         try:
-            self.NTRANS=self.read_integer()
-            self.KSTP=self.read_integer()
-            self.KPER=self.read_integer()
-            self.TOTIM=self.read_real()
-            self.TEXT=self.read_text()
-            self.NCOL=self.read_integer()
-            self.NROW=self.read_integer()
-            self.ILAY=self.read_integer()
 
-            return True
+            NTRANS=self.read_integer()
+            KSTP=self.read_integer()
+            KPER=self.read_integer()
+            TOTIM=self.read_real()
+            TEXT=self.read_text()
+            NCOL=self.read_integer()
+            NROW=self.read_integer()
+            ILAY=self.read_integer()
+            return NTRANS,KSTP,KPER,TOTIM,TEXT,NCOL,NROW,ILAY,True
         except:
-            return False
+            return -999,-999,-999,-999,-999,-999,-999,-999,False
 
     def read_layerconcens(self):
         cl = self.read_2drealarray()
@@ -913,18 +934,39 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
     def __iter__(self):
         return self
 
+    
+    def time_list(self):    
+        self.file.seek(0)
+#        current_position = self.file.tell()
+        times = []
+        while True:
+            current_position = self.file.tell()
+            totim,h,kstp,kper,success = self.next()
+            if success == True:
+                #this_time = [totim,kstp,kper,current_position]
+                times.append([totim,kstp,kper,current_position])
+#                current_position = self.file.tell()
+            else: 
+                self.file.seek(0)
+                times = numpy.array( times )
+                return times
+
     def next(self):
      for k in range(self.nlay):
-         success=self.read_header()
+         NTRANS,KSTP,KPER,TOTIM,TEXT,NCOL,NROW,ILAY,success=self.read_header()
          if success:
-             assert self.NCOL==self.ncol, 'NCOL not consistent with binary heads file.'
-             assert self.NROW==self.nrow, 'NROW not consistent with binary heads file.'
-             self.h[self.ILAY-1, :, :] = self.read_layerconcens()
+             assert NCOL==self.ncol, 'NCOL not consistent with binary heads file.'
+             assert NROW==self.nrow, 'NROW not consistent with binary heads file.'
+             self.h[ILAY-1, :, :] = self.read_layerconcens()
          else:
              print 'MT3DMS_Concentration object.read_next_heads() reached end of file.'
              return 0., numpy.zeros((self.nlay, self.nrow, self.ncol),dtype='float')+1.0E+32, 0,0,False
-     print 'MT3DMS concentration read (ntrans,kstp,kper,time): ',self.NTRANS,self.KSTP,self.KPER,self.TOTIM 
-     return self.TOTIM,self.h,self.KSTP,self.KPER,True
+     #print 'MT3DMS concentration read (ntrans,kstp,kper,time): ',NTRANS,KSTP,KPER,TOTIM 
+     self.kper = KPER
+     self.ntrans = NTRANS
+     self.kstp = KSTP
+     self.totim = TOTIM
+     return self.totim,self.h,self.kstp,self.kper,True
      
     def get_record(self,*args):
      	try:
@@ -947,4 +989,4 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
     			else:
     				return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self.ncol),dtype='float')+1.0E+32,False
     			
-   			 	
+    			 	
