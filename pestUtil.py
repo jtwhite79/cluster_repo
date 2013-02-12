@@ -384,20 +384,20 @@ class smp():
         else:
             return unique                  
 
-def set_daterange(self,start,end,site_name=None):
-        if site_name != None:
-            rec = []
-            for dt,val in self.records[site_name]:
-                if dt >=start and dt <=end:
-                    rec.append([dt,val])
-            self.records[site_name] = np.array(rec)
-        else:
-            for site,record in self.records.iteritems():
+    def set_daterange(self,start,end,site_name=None):
+            if site_name != None:
                 rec = []
-                for dt,val in record:
+                for dt,val in self.records[site_name]:
                     if dt >=start and dt <=end:
                         rec.append([dt,val])
-                self.records[site] = np.array(rec)
+                self.records[site_name] = np.array(rec)
+            else:
+                for site,record in self.records.iteritems():
+                    rec = []
+                    for dt,val in record:
+                        if dt >=start and dt <=end:
+                            rec.append([dt,val])
+                    self.records[site] = np.array(rec)
 
     
     def write_daterange(self,site_name,file_name,start,end,step):
@@ -1147,31 +1147,24 @@ def load_rmr_results(filename,byRoot=False):
  
     
     def load_pars_from_rec(rec_filename):
-    reg = re.compile('Current parameter values                 Previous parameter values')
-    f = open(rec_filename,'r')
-    it_pars = []
-    while True:
-        line = f.readline()
-        if line == '':
-            break
-        if reg.match(line.strip()):
-            pn,pv= [],[]
-            while True:
-                line2 = f.readline()
-                raw = line2.strip().split()
-                if line2 == '' or len(raw) != 4:
-                    break
-                pname = raw[0]
-                prev_val = float(raw[1])
-                new_val = float(raw[3])
-                pn.append(panme)
-                pv.append([prev_val,new_val])
-                                   
-    f.close()
-
-               
-
-                
-   
-    
-        
+        reg = re.compile('Current parameter values                 Previous parameter values')
+        f = open(rec_filename,'r')
+        it_pars = []
+        while True:
+            line = f.readline()
+            if line == '':
+                break
+            if reg.match(line.strip()):
+                pn,pv= [],[]
+                while True:
+                    line2 = f.readline()
+                    raw = line2.strip().split()
+                    if line2 == '' or len(raw) != 4:
+                        break
+                    pname = raw[0]
+                    prev_val = float(raw[1])
+                    new_val = float(raw[3])
+                    pn.append(panme)
+                    pv.append([prev_val,new_val])
+                                       
+        f.close()
