@@ -48,7 +48,16 @@ def load_shape_list(shape_name):
             raise NotImplementedError('only polylines and points are supported')
     return shape_list
 
-
+def get_fieldnames(shape_name,ignorecase=False):
+    shp = Reader(shape_name)
+    header = shp.dbfHeader()
+    names = []
+    for item in header:
+        if ignorecase:
+            names.append(item[0].upper())
+        else:
+            names.append(item[0])
+    return names
 
 
 def writer_like(shape_name):
@@ -83,12 +92,12 @@ def add_attribute(new_attirbs,shape_name):
                 shp_new.record(this_rec)
     return shp_new
 
-def load_as_dict(shape_name,attrib_name_list=None):
+def load_as_dict(shape_name,attrib_name_list=None,loadShapes=True):
     '''loads all the shapefile shapes and records
     only the attributes listed in attrib_name_list are loaded
     if None, then all attrib are loaded
     tries to cast records values as np arrays
-    returns shapes,records
+    returns shapes,records or records, depending on loadShapes
     '''    
     #--create the shape instance
     shp = Reader(shape_name)
@@ -113,7 +122,8 @@ def load_as_dict(shape_name,attrib_name_list=None):
                 else:
                     attrib_idx[a_name] = attrib_names.index(a_name)                        
     #--get shapes
-    shapes = shp.shapes()
+    if loadShapes:
+        shapes = shp.shapes()
     #--seed records dict with empty lists
     records = {}
     rec_type = {}
@@ -135,7 +145,10 @@ def load_as_dict(shape_name,attrib_name_list=None):
         else:
             a = a_list
         records[a_name] = a
-    return shapes,records
+    if loadShapes:
+        return shapes,records
+    else:
+        return records
 
 def load_attrib_idx(shape_name):
     shp = Reader(shape_name)
