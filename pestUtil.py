@@ -1166,6 +1166,7 @@ def load_rmr_results(filename,byRoot=False):
                     new_val = float(raw[3])
                     pn.append(panme)
                     pv.append([prev_val,new_val])
+<<<<<<< HEAD
                                    
         f.close()
 
@@ -1175,3 +1176,7 @@ def load_rmr_results(filename,byRoot=False):
    
     
         
+=======
+                                       
+        f.close()
+>>>>>>> 26e7a783a06cab5e3a0288f0916e60279c1b0fd8

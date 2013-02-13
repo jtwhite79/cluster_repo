@@ -95,9 +95,11 @@ class MFReadBinaryStatements:
     #--byte definition
     integer=numpy.int32
     real=numpy.float32
+    double=numpy.float64
     character=numpy.uint8
     integerbyte=4
     realbyte=4
+    doublebyte=8
     textbyte=1
     def read_integer(self):
         intvalue=struct.unpack('i',self.file.read(1*MFReadBinaryStatements.integerbyte))[0]
@@ -105,9 +107,16 @@ class MFReadBinaryStatements:
     def read_real(self):
         realvalue=struct.unpack('f',self.file.read(1*MFReadBinaryStatements.realbyte))[0]
         return realvalue
+    def read_double(self):
+        doublevalue=struct.unpack('f',self.file.read(1*MFReadBinaryStatements.doublebyte))[0]
+        return doublevalue
     def read_text(self):
         #textvalue=struct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
         textvalue=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=16).tostring()
+        return textvalue
+    def read_hyd_text(self,nchar=20):
+        #textvalue=struct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
+        textvalue=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=nchar).tostring()
         return textvalue
     def read_3drealarray(self):
         x=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.real, count=self.nlay*self.nrow*self.ncol)
@@ -989,4 +998,133 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
     			else:
     				return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self.ncol),dtype='float')+1.0E+32,False
     			
+
+class MODFLOW_HYDMOD(MFReadBinaryStatements):
+    'Reads binary head output from MODFLOW head file'
+    def __init__(self,filename):
+        #initialize class information
+        self.skip = False
+        self.double = False
+        #--open binary head file
+        self.file=open(filename,'rb')
+        #--NHYDTOT,ITMUNI
+        self.nhydtot=self.read_integer()
+        self.itmuni=self.read_integer()
+        if self.nhydtot < 0:
+            self.double = True
+            self.nhydtot = abs( self.nhydtot )
+        self.v = numpy.empty((self.nhydtot),dtype='float')
+        self.v.fill(1.0E+32)
+        ctime = self.read_hyd_text(nchar=4)
+        #--read HYDLBL
+        hydlbl = []
+        #hydid = []
+        for idx in xrange(0,self.nhydtot):
+            cid = self.read_hyd_text()
+            hydlbl.append( cid )
+        self.hydlbl = numpy.array( hydlbl )
+        print self.hydlbl
+        #--set position
+        self.datastart = self.file.tell()
+        #get times
+        self.times = self.time_list()
+
+    def get_time_list(self):
+        return self.times
+        
+    def get_num_items(self):
+        return self.nhydtot
+
+    def get_hyd_labels(self):
+        return self.hydlbl
+    
+    def rewind_file(self):    
+        self.file.seek(self.datastart)
+        return True
+        
+    def time_list(self):    
+        self.skip = True
+        self.file.seek(self.datastart)
+        times = []
+        while True:
+            current_position = self.file.tell()
+            totim,v,success = self.next()
+            if success == True:
+                times.append([totim,current_position])
+            else: 
+                self.file.seek(self.datastart)
+                times = numpy.array( times )
+                self.skip = False
+                return times
+
+        
+    def __iter__(self):
+        return self
+
+    def read_header(self):
+        try:
+            totim=self.read_real()
+            return totim,True
+        except:
+            return -999.,False 
+
+    def next(self):
+        totim,success=self.read_header()
+        if(success):
+            for idx in xrange(0,self.nhydtot):
+                if self.double==True:
+                    self.v[idx] = float(self.read_double())
+                else:
+                    self.v[idx] = self.read_real()
+        else:
+            print 'MODFLOW_HYDMOD object.next() reached end of file.'
+            self.v.fill(1.0E+32)
+        return totim,self.v,success
+
+    def get_values(self,idx):
+        iposition = long( self.times[idx,1] )
+        self.file.seek(iposition)
+        totim,v,success = self.next()
+        if success == True:
+            return totim,v,True
+        else:
+            self.v.fill( 1.0E+32 )
+            return 0.0,self.v,False 
+
+    def get_time_gage(self,record):
+        try:
+            idx = int( record ) - 1
+        except:
+            for icnt,cid in enumerate(self.hydlbl):
+                if record.lower() in cid.lower():
+                    idx = icnt
+                    break
+        gage_record = numpy.zeros((2))#tottime plus observation
+        #--find offset to position
+        ilen = self.get_point_offset(idx)
+        #--get data
+        for time_data in self.times:
+            self.file.seek(long(time_data[1])+ilen)
+            if self.double == True:
+                v=float(self.read_double())
+            else:
+                v=self.read_real()
+            this_entry = numpy.array([float(time_data[0])])
+            this_entry = numpy.hstack((this_entry,v))
+            gage_record = numpy.vstack((gage_record,this_entry))
+        #delete the first 'zeros' element
+        gage_record = numpy.delete(gage_record,0,axis=0)
+        return gage_record
+
+    def get_point_offset(self,ipos):
+        self.file.seek(self.datastart)
+        lpos0 = self.file.tell()
+        point_offset = long(0)
+        totim,success=self.read_header()
+        idx = (ipos)
+        lpos1 = self.file.tell() + idx*MFReadBinaryStatements.realbyte
+        self.file.seek(lpos1)
+        point_offset = self.file.tell() - lpos0
+        return point_offset
+
     			 	
