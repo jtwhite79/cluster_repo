@@ -164,8 +164,8 @@ class smp():
     '''simple, poorly designed class to handle site sample file types
     casts date and time fields to a single datetime object    
     '''
-    def __init__(self,fname,date_fmt='%d/%m/%Y',load=False,pandas=False):
-        assert os.path.exists(fname)
+    def __init__(self,fname=None,date_fmt='%d/%m/%Y',load=False,pandas=False,site_index=True):
+        #assert os.path.exists(fname)
         self.fname = fname
         self.date_fmt = date_fmt
         self.site_index = 0
@@ -173,7 +173,8 @@ class smp():
         self.time_index = 2
         self.value_index = 3
         self.pandas = pandas
-        self.site_list = self.initialize_site_list()
+        if site_index and fname is not None:
+            self.site_list = self.initialize_site_list()
         if load is True:            
             self.records = self.load('all')            
         else:
@@ -241,16 +242,19 @@ class smp():
         site_list = []
         for line in f:
             if line.strip() == '':
-                break                             
-            pline = self.parse_line(line)
-            found = False
-            if len( site_list ) > 0:
-                for site in site_list:
-                    if pline[0] == site:
-                        found = True
-                        break
-            if found == False:
-                site_list.append( pline[0] )
+                break                        
+            site = line.split()[0]
+            if site not in site_list:
+                site_list.append(site)     
+            #pline = self.parse_line(line)
+            #found = False
+            #if len( site_list ) > 0:
+            #    for site in site_list:
+            #        if pline[0] == site:
+            #            found = True
+            #            break
+            #if found == False:
+            #    site_list.append( pline[0] )
         f.close()
         return np.array( site_list )
     
