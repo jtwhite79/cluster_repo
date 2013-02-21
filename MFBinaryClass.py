@@ -150,8 +150,6 @@ class MFReadBinaryStatements:
         x=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.real, count=i)
         return x
 
-
-
 class MF_Discretization:
     def assign_rowcollay(self,nlay,nrow,ncol):
         #initialize grid information
@@ -178,7 +176,7 @@ class SWR_BinaryObs(SWRReadBinaryStatements):
             cid = self.read_obs_text()
             obsnames.append( cid )
         self.obsnames = numpy.array( obsnames )
-        print self.obsnames
+        #print self.obsnames
         #--set position
         self.datastart = self.file.tell()
         #get times
@@ -244,25 +242,29 @@ class SWR_BinaryObs(SWRReadBinaryStatements):
             return 0.0,self.v,False 
 
     def get_time_gage(self,record):
+        idx = -1
         try:
             idx = int( record ) - 1
+            print 'retrieving SWR observation record [{0}]'.format( idx+1 )
         except:
             for icnt,cid in enumerate(self.obsnames):
-                if record.lower() in cid.lower():
+                if record.strip().lower() == cid.strip().lower():
                     idx = icnt
+                    print 'retrieving SWR observation record [{0}] {1}'.format( idx+1, record.strip().lower() )
                     break
         gage_record = numpy.zeros((2))#tottime plus observation
-        #--find offset to position
-        ilen = self.get_point_offset(idx)
-        #--get data
-        for time_data in self.times:
-            self.file.seek(long(time_data[1])+ilen)
-            v=self.read_real()
-            this_entry = numpy.array([float(time_data[0])])
-            this_entry = numpy.hstack((this_entry,v))
-            gage_record = numpy.vstack((gage_record,this_entry))
-        #delete the first 'zeros' element
-        gage_record = numpy.delete(gage_record,0,axis=0)
+        if idx != -1 and idx < self.nobs:
+            #--find offset to position
+            ilen = self.get_point_offset(idx)
+            #--get data
+            for time_data in self.times:
+                self.file.seek(long(time_data[1])+ilen)
+                v=self.read_real()
+                this_entry = numpy.array([float(time_data[0])])
+                this_entry = numpy.hstack((this_entry,v))
+                gage_record = numpy.vstack((gage_record,this_entry))
+            #delete the first 'zeros' element
+            gage_record = numpy.delete(gage_record,0,axis=0)
         return gage_record
 
     def get_point_offset(self,ipos):
@@ -1209,29 +1211,42 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
             self.v.fill( 1.0E+32 )
             return 0.0,self.v,False 
 
-    def get_time_gage(self,record):
+    def get_time_gage(self,record,lblstrip=6):
+        idx = -1
         try:
             idx = int( record ) - 1
+            if idx >= 0 and idx < self.nhydtot:
+                print 'retrieving HYDMOD observation record [{0}]'.format( idx+1 )
+            else:
+                print 'Error: HYDMOD observation record {0} not found'.format( record.strip().lower() )
         except:
             for icnt,cid in enumerate(self.hydlbl):
-                if record.lower() in cid.lower():
+                if lblstrip > 0:
+                    tcid = cid[lblstrip:len(cid)]
+                else:
+                    tcid = cid
+                if record.strip().lower() == tcid.strip().lower():
                     idx = icnt
+                    print 'retrieving HYDMOD observation record [{0}] {1}'.format( idx+1, record.strip().lower() )
                     break
+            if idx == -1:
+                print 'Error: HYDMOD observation record {0} not found'.format( record.strip().lower() )
         gage_record = numpy.zeros((2))#tottime plus observation
-        #--find offset to position
-        ilen = self.get_point_offset(idx)
-        #--get data
-        for time_data in self.times:
-            self.file.seek(long(time_data[1])+ilen)
-            if self.double == True:
-                v=float(self.read_double())
-            else:
-                v=self.read_real()
-            this_entry = numpy.array([float(time_data[0])])
-            this_entry = numpy.hstack((this_entry,v))
-            gage_record = numpy.vstack((gage_record,this_entry))
-        #delete the first 'zeros' element
-        gage_record = numpy.delete(gage_record,0,axis=0)
+        if idx != -1 and idx < self.nhydtot:
+            #--find offset to position
+            ilen = self.get_point_offset(idx)
+            #--get data
+            for time_data in self.times:
+                self.file.seek(long(time_data[1])+ilen)
+                if self.double == True:
+                    v=float(self.read_double())
+                else:
+                    v=self.read_real()
+                this_entry = numpy.array([float(time_data[0])])
+                this_entry = numpy.hstack((this_entry,v))
+                gage_record = numpy.vstack((gage_record,this_entry))
+            #delete the first 'zeros' element
+            gage_record = numpy.delete(gage_record,0,axis=0)
         return gage_record
 
     def get_point_offset(self,ipos):
