@@ -131,18 +131,18 @@ def write_coords(fname,namelist,xlist,ylist,zonelist,vlist):
     f.close()
 
 
-def load_smp_from_tsproc(filename):
+def load_smp_from_tsproc(filename,date_fmt='%m/%d/%Y'):
     '''loads the time series from a tsproc output file to an smp instance
     '''
     f = open(filename,'r')
-    s = smp(date_fmt='%m/%d/%Y')
+    s = smp(date_fmt=date_fmt)
     while True:
         line = f.readline()
         if line == '':
             break
-        if 'TIME_SERIES' in line.upper():
+        if 'time_series' in line.lower():
             raw = line.strip().split()
-            site_name = raw[1].replace('"','')
+            site_name = raw[1].replace('"','').lower()
             record = []
             while True:
                 line2 = f.readline()
@@ -243,7 +243,7 @@ class smp():
         for line in f:
             if line.strip() == '':
                 break                        
-            site = line.split()[0]
+            site = line.split()[0].lower()
             if site not in site_list:
                 site_list.append(site)     
             #pline = self.parse_line(line)
@@ -266,7 +266,7 @@ class smp():
         if self.pandas, then load('all') returns a pandas datafram
         and load() returns a pandas series indexed by date
         '''                           
-        if site.upper() != 'ALL':                        
+        if site.lower() != 'all':                        
             f = self.read_to(self.site_index,site)
             record = []
             while True:
@@ -318,13 +318,17 @@ class smp():
             #df = pandas.DataFrame(dict)
             for site in sites:
                 record = records[site]            
-                dict = {'date':record[:,0],site:record[:,1]}
-                df = pandas.DataFrame({site:record[:,1].astype(np.float32)},index=record[:,0])                
+                dict = {site:record[:,1]}
+                df = pandas.DataFrame({site:record[:,1].astype(np.float32)},index=record[:,0])  
+                print site,df.shape,' ', 
+                df = df.drop_duplicates()          
+                print df.shape
                 dfs.append(df)
                 #df = pandas.merge(df,df2,how='outer',right_on='date',left_on='date')
             #df.index = df['date']
             #df.pop('date')
             df = pandas.concat(dfs,axis=1)
+            print df.shape
             return df
         else:
             return pandas.DataFrame()
@@ -431,7 +435,7 @@ class smp():
         records must be loaded
         '''
 
-        if site_name.upper() == 'ALL':
+        if site_name.lower() == 'all':
             start_dict = {}
             end_dict = {}
             for site,record in self.records.iteritems():
@@ -481,7 +485,7 @@ class smp():
         raw = line.strip().split() 
         if len(raw) != 4:
             print raw
-        site = raw[self.site_index]
+        site = raw[self.site_index].lower()
         dt = datetime.strptime(raw[self.date_index]+' '+raw[self.time_index],self.date_fmt+' %H:%M:%S')
         val = float(raw[3])
         return [site,dt,val]
