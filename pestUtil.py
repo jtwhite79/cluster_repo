@@ -140,9 +140,9 @@ def load_smp_from_tsproc(filename,date_fmt='%m/%d/%Y'):
         line = f.readline()
         if line == '':
             break
-        if 'time_series' in line.lower():
+        if 'TIME_SERIES' in line.upper():
             raw = line.strip().split()
-            site_name = raw[1].replace('"','').lower()
+            site_name = raw[1].replace('"','')
             record = []
             while True:
                 line2 = f.readline()
@@ -243,7 +243,7 @@ class smp():
         for line in f:
             if line.strip() == '':
                 break                        
-            site = line.split()[0].lower()
+            site = line.split()[0]
             if site not in site_list:
                 site_list.append(site)     
             #pline = self.parse_line(line)
@@ -266,7 +266,7 @@ class smp():
         if self.pandas, then load('all') returns a pandas datafram
         and load() returns a pandas series indexed by date
         '''                           
-        if site.lower() != 'all':                        
+        if site.upper() != 'ALL':                        
             f = self.read_to(self.site_index,site)
             record = []
             while True:
@@ -318,17 +318,13 @@ class smp():
             #df = pandas.DataFrame(dict)
             for site in sites:
                 record = records[site]            
-                dict = {site:record[:,1]}
-                df = pandas.DataFrame({site:record[:,1].astype(np.float32)},index=record[:,0])  
-                print site,df.shape,' ', 
-                df = df.drop_duplicates()          
-                print df.shape
+                dict = {'date':record[:,0],site:record[:,1]}
+                df = pandas.DataFrame({site:record[:,1].astype(np.float32)},index=record[:,0])                
                 dfs.append(df)
                 #df = pandas.merge(df,df2,how='outer',right_on='date',left_on='date')
             #df.index = df['date']
             #df.pop('date')
             df = pandas.concat(dfs,axis=1)
-            print df.shape
             return df
         else:
             return pandas.DataFrame()
@@ -435,7 +431,7 @@ class smp():
         records must be loaded
         '''
 
-        if site_name.lower() == 'all':
+        if site_name.upper() == 'ALL':
             start_dict = {}
             end_dict = {}
             for site,record in self.records.iteritems():
@@ -485,7 +481,7 @@ class smp():
         raw = line.strip().split() 
         if len(raw) != 4:
             print raw
-        site = raw[self.site_index].lower()
+        site = raw[self.site_index]
         dt = datetime.strptime(raw[self.date_index]+' '+raw[self.time_index],self.date_fmt+' %H:%M:%S')
         val = float(raw[3])
         return [site,dt,val]
