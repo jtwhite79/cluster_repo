@@ -131,11 +131,11 @@ def write_coords(fname,namelist,xlist,ylist,zonelist,vlist):
     f.close()
 
 
-def load_smp_from_tsproc(filename):
+def load_smp_from_tsproc(filename,date_fmt='%m/%d/%Y'):
     '''loads the time series from a tsproc output file to an smp instance
     '''
     f = open(filename,'r')
-    s = smp(date_fmt='%m/%d/%Y')
+    s = smp(date_fmt=date_fmt)
     while True:
         line = f.readline()
         if line == '':
