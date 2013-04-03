@@ -34,7 +34,7 @@ def load_shape_list(shape_name):
     shapes = shp.shapes()
     shape_list = []
     for shape in shapes:
-        if shape.shapeType == POLYLINE:            
+        if shape.shapeType == POLYLINE or shape.shapeType == POLYGON or shape.shapeType == POLYGONM:            
             xs,ys = [],[]
             points = shape.points
             for [x,y] in points:
@@ -45,7 +45,7 @@ def load_shape_list(shape_name):
             points = shape.points          
             shape_list.append(np.array([points[0][0],points[0][1]]))
         else:
-            raise NotImplementedError('only polylines and points are supported')
+            raise NotImplementedError('only polygons, polylines, and points are supported')
     return shape_list
 
 def get_fieldnames(shape_name,ignorecase=False):
