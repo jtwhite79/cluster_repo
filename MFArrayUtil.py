@@ -227,6 +227,11 @@ def writeArrayToFile(array,file,**kwargs):
                 oFormat = '{0:3.0f}'
     except:
         oFormat = '{0:14.6E}'
+
+    try:
+        oFormat = kwargs['cFormat']
+    except:
+        cFormat = False
     
     
     assert len(np.shape(array)) == 2
