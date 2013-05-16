@@ -799,9 +799,9 @@ def plotgrid( x, y, d, **kwargs ):
     gc.collect()
     return
 
-def polyline_plot( ax, polyline_list, polyline_color='black' ):
+def polyline_plot( ax, polyline_list, polyline_color='black', linewidth=0.5 ):
     for line in polyline_list:
-        ax.plot(line[0,:],line[1,:],linestyle='solid',color=polyline_color,linewidth=0.5)
+        ax.plot(line[0,:],line[1,:],linestyle='solid',color=polyline_color,linewidth=linewidth)
     return
 
 def point_plot( ax, point_list, marker='o', markersize=3, markeredgecolor='blue', markerfacecolor='None' ):
