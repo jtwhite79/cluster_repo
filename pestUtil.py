@@ -131,7 +131,7 @@ def write_coords(fname,namelist,xlist,ylist,zonelist,vlist):
     f.close()
 
 
-def load_smp_from_tsproc(filename,date_fmt='%m/%d/%Y'):
+def load_smp_from_tsproc(filename,date_fmt='%m/%d/%Y',aspandas=False):
     '''loads the time series from a tsproc output file to an smp instance
     '''
     f = open(filename,'r')
@@ -154,6 +154,8 @@ def load_smp_from_tsproc(filename,date_fmt='%m/%d/%Y'):
                 record.append(line2[1:])
             s.records[site_name] = np.array(record)
     f.close()
+    if aspandas:
+        s.records = s.records2dataframe(s.records)
     return s
 
 
@@ -164,7 +166,7 @@ class smp():
     '''simple, poorly designed class to handle site sample file types
     casts date and time fields to a single datetime object    
     '''
-    def __init__(self,fname=None,date_fmt='%d/%m/%Y',load=False,pandas=False,site_index=True):
+    def __init__(self,fname=None,date_fmt='%d/%m/%Y',load=False,pandas=False,site_index=True,lower=False):
         #assert os.path.exists(fname)
         self.fname = fname
         self.date_fmt = date_fmt
@@ -173,6 +175,7 @@ class smp():
         self.time_index = 2
         self.value_index = 3
         self.pandas = pandas
+        self.lower = lower
         if site_index and fname is not None:
             self.site_list = self.initialize_site_list()
         if load is True:            
@@ -243,7 +246,7 @@ class smp():
         for line in f:
             if line.strip() == '':
                 break                        
-            site = line.split()[0]
+            site = line.split()[0].lower()
             if site not in site_list:
                 site_list.append(site)     
             #pline = self.parse_line(line)
@@ -482,6 +485,9 @@ class smp():
         if len(raw) != 4:
             print raw
         site = raw[self.site_index]
+        if self.lower:
+            site = site.lower()
+            
         dt = datetime.strptime(raw[self.date_index]+' '+raw[self.time_index],self.date_fmt+' %H:%M:%S')
         val = float(raw[3])
         return [site,dt,val]

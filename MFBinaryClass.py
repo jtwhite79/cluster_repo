@@ -1121,10 +1121,13 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
 
 class MODFLOW_HYDMOD(MFReadBinaryStatements):
     'Reads binary head output from MODFLOW head file'
-    def __init__(self,filename):
+    def __init__(self,filename,double=False,slurp=False):
+        '''slurp is a short cut to read all output using numpy fromfile()
+        if you use it, you don't need to read times
+        '''
         #initialize class information
-        self.skip = False
-        self.double = False
+        self.skip = True
+        self.double = bool(double)
         #--open binary head file
         self.file=open(filename,'rb')
         #--NHYDTOT,ITMUNI
@@ -1143,11 +1146,13 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
             cid = self.read_hyd_text()
             hydlbl.append( cid )
         self.hydlbl = numpy.array( hydlbl )
-        print self.hydlbl
-        #--set position
-        self.datastart = self.file.tell()
-        #get times
-        self.times = self.time_list()
+        #print self.hydlbl
+        if not slurp:
+            #--set position
+            self.datastart = self.file.tell()
+            #get times
+            self.times = self.time_list()
+       
 
     def get_time_list(self):
         return self.times
@@ -1180,6 +1185,18 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
         
     def __iter__(self):
         return self
+
+    def slurp(self):
+        if self.double:
+            float_type = numpy.float64
+        else:
+            float_type = numpy.float32
+        dtype_list = [('totim',float_type)]
+        for site in self.hydlbl:
+            dtype_list.append((site[6:].strip(),float_type))
+        dtype = numpy.dtype(dtype_list)
+        data = numpy.fromfile(self.file,dtype,count=-1)
+        return data        
 
     def read_header(self):
         try:
