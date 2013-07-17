@@ -1,7 +1,6 @@
 #--2d real array utilities 
 #--for reading, writing and plotting
 #--ASCII 2-D MODFLOW real arrays
-#test
 #--libraries
 import numpy as np
 import os
@@ -12,6 +11,19 @@ import time
 
 #import blnUtil
 #reload(blnUtil)
+
+no_data = -999
+
+def TestDirExist(ctest):
+    #--Evaluate if the directories in ctest exist.
+    #  Create the directories in ctest if they do not already exist.
+    for f in ctest:
+        sys.stdout.write( 'evaluating...\n  "{0}"\n'.format( os.path.dirname( f ) ) )
+        fa = os.path.abspath(f)
+        d = os.path.dirname(fa)
+        if not os.path.exists(d):
+            sys.stdout.write( 'creating directory path...\n  "{0}"\n'.format( os.path.dirname( f ) ) )
+            os.makedirs(d)
 
 
 def mapBndCellsArray(nrow,ncol,bndcells,**kwargs):  
@@ -47,7 +59,7 @@ def mapBndCellsArray(nrow,ncol,bndcells,**kwargs):
 
 
 
-def loadArrayFromFile(nrow,ncol,file):
+def loadArrayFromFile(nrow,ncol,file,ctype=None):
     '''
     read 2darray from file
     file(str) = path and filename
@@ -75,10 +87,13 @@ def loadArrayFromFile(nrow,ncol,file):
                 sys.exit()
             if d == (nrow*ncol)-1:
                 assert len(data) == (nrow*ncol)
-                data.resize(nrow,ncol)
-                return(data) 
+                #data.resize(nrow,ncol)
+                #return(data) 
             d += 1  
     file_in.close()
+    if ctype != None:
+        if ctype.lower() == 'i':
+            data = data.astype(np.int32)
     data.resize(nrow,ncol)
     return(data)
 
