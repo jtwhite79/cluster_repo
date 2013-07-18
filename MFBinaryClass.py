@@ -1242,8 +1242,7 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
                     self.v[idx] = self.read_real()
         else:
             if self.verbose == True:
-                if self.verbose == True:
-                    print 'MODFLOW_HYDMOD object.next() reached end of file.'
+                print 'MODFLOW_HYDMOD object.next() reached end of file.'
             self.v.fill(1.0E+32)
         return totim,self.v,success
 
