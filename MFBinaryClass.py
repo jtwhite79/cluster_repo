@@ -161,9 +161,10 @@ class MF_Discretization:
 
 class SWR_BinaryObs(SWRReadBinaryStatements):
     'Reads binary head output from MODFLOW head file'
-    def __init__(self,filename):
+    def __init__(self,filename,verbose=False):
         #initialize class information
         self.skip = False
+        self.verbose = verbose
         #--open binary head file
         self.file=open(filename,'rb')
         #--NOBS
@@ -227,7 +228,8 @@ class SWR_BinaryObs(SWRReadBinaryStatements):
             for idx in xrange(0,self.nobs):
                 self.v[idx] = self.read_real()
         else:
-            print '_BinaryObs object.next() reached end of file.'
+            if self.verbose == True:
+                print '_BinaryObs object.next() reached end of file.'
             self.v.fill(1.0E+32)
         return totim,self.v,success
 
@@ -245,12 +247,14 @@ class SWR_BinaryObs(SWRReadBinaryStatements):
         idx = -1
         try:
             idx = int( record ) - 1
-            print 'retrieving SWR observation record [{0}]'.format( idx+1 )
+            if self.verbose == True:
+                print 'retrieving SWR observation record [{0}]'.format( idx+1 )
         except:
             for icnt,cid in enumerate(self.obsnames):
                 if record.strip().lower() == cid.strip().lower():
                     idx = icnt
-                    print 'retrieving SWR observation record [{0}] {1}'.format( idx+1, record.strip().lower() )
+                    if self.verbose == True:
+                        print 'retrieving SWR observation record [{0}] {1}'.format( idx+1, record.strip().lower() )
                     break
         gage_record = numpy.zeros((2))#tottime plus observation
         if idx != -1 and idx < self.nobs:
@@ -280,13 +284,14 @@ class SWR_BinaryObs(SWRReadBinaryStatements):
 
 
 class SWR_Record(SWRReadBinaryStatements):
-    def __init__(self,type,filename):
+    def __init__(self,type,filename,verbose=False):
         #--type =  0 = stage record
         #--type = -1 = reach group record
         #--type = -2 = reach group connection velocity record
         #--type >  0 = aq-reach exchange record type = nlay
         self.file = open(filename,'rb')
         self.type = int(type)
+        self.verbose = verbose
         self.nrgout = 0
         if self.type == -2:
             self.nrgout = self.read_integer()
@@ -300,7 +305,8 @@ class SWR_Record(SWRReadBinaryStatements):
         #read connectivity for velocity data if necessary
         if self.type == -2:
             self.connectivity = self.read_connectivity()
-            #print self.connectivity
+            if self.verbose == True:
+                print self.connectivity
         if self.type > 0:
             self.reachlayers = numpy.zeros( (self.nrecord), numpy.int )
         self.datastart = self.file.tell()
@@ -386,7 +392,8 @@ class SWR_Record(SWRReadBinaryStatements):
                 for i in range(0,self.nrecord):
                     self.reachlayers[i] = self.read_integer() 
             except:
-                #print 'could not read reachlayers'
+                if self.verbose == True:
+                    print 'could not read reachlayers'
                 return 0.0,0.0,0,0,0,False
         try: 
             totim = self.read_real()
@@ -407,7 +414,8 @@ class SWR_Record(SWRReadBinaryStatements):
                 totim,dt,kper,kstp,swrstp,success,r = self.next()
                 if success == True:
                     if kkspt == kstp and kkper == kper:
-                        print totim,dt,kper,kstp,swrstp,True
+                        if self.verbose == True:
+                            print totim,dt,kper,kstp,swrstp,True
                         return totim,dt,kper,kstp,swrstp,True,r
                 else:
                     return 0.0,0.0,0,0,0,False,self.null_record
@@ -480,7 +488,8 @@ class SWR_Record(SWRReadBinaryStatements):
     def next(self):
         totim,dt,kper,kstp,swrstp,success = self.read_header()        
         if success == False: 
-#            print 'SWR_Stage.next() object reached end of file'
+            if self.verbose == True:
+                print 'SWR_Stage.next() object reached end of file'
             return 0.0,0.0,0,0,0,False,self.null_record
         else:
             if self.type > 0:
@@ -528,7 +537,8 @@ class SWR_Record(SWRReadBinaryStatements):
         self.file.seek(long(self.times[time_index][5]))
         totim,dt,kper,kstp,swrstp,success,r = self.next()
         if success == True:
-            print totim,dt,kper,kstp,swrstp,True
+            if self.verbose == True:
+                print totim,dt,kper,kstp,swrstp,True
             return totim,dt,kper,kstp,swrstp,True,r
         else:
             return 0.0,0.0,0,0,0,False,self.null_record
@@ -613,7 +623,7 @@ class SWR_Record(SWRReadBinaryStatements):
     
 class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
     'Reads binary head output from MODFLOW head file'
-    def __init__(self,nlay,nrow,ncol,filename):
+    def __init__(self,nlay,nrow,ncol,filename,verbose=False):
         #initialize grid information
         self.assign_rowcollay(nlay,nrow,ncol)
         self.h = numpy.zeros((self.nlay, self.nrow, self.ncol)) + 1.0E+32
@@ -622,6 +632,7 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
         self.y0 = 0.0
         self.dx = 0.0
         self.dy = 0.0
+        self.verbose = verbose
         self.skip = False
         self.datastart = 0
         #open binary head file
@@ -696,7 +707,8 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
             ncol=self.read_integer()
             nrow=self.read_integer()
             ilay=self.read_integer()
-#            print kstp,kper,ilay,nrow,ncol,pertim,totim,True
+            if self.verbose == True:
+                print kstp,kper,ilay,nrow,ncol,pertim,totim,True
             return kstp,kper,pertim,totim,ncol,nrow,ilay,True
         except:
             return 0,0,0.,0.,0,0,0,False 
@@ -722,14 +734,16 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
                 assert ilay==k+1, 'Layers in head file are not sequential'
                 self.h[ilay - 1, :, :] = self.read_layerheads()
             else:
-                print 'MODFLOW_Head object.next() reached end of file.'
+                if self.verbose == True:
+                    print 'MODFLOW_Head object.next() reached end of file.'
                 return 0.,0,0, numpy.zeros((self.nlay, self.nrow, self.ncol),\
                 dtype='float')+1.0E+32,False
         self.KSTP=kstp
         self.KPER=kper
         self.PERTIM=pertim
         self.TOTIM=totim
-#        print 'Heads read for time step ',kstp,' and stress period ',kper
+        if self.verbose == True:
+            print 'Heads read for time step ',kstp,' and stress period ',kper
         return totim,kstp,kper,self.h,True
      
     def get_record(self,*args):
@@ -740,7 +754,8 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
                 totim,kstp,kper,h,success = self.next()
                 if success == True:
                     if kstp == kkspt and kkper == kper:
-                        print totim,kstp,kper,True
+                        if self.verbose == True:
+                            print totim,kstp,kper,True
                         return totim,kstp,kper,h,True
                 else:
                     return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
@@ -767,7 +782,8 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
     #rec_num is modflow node number
     def get_gage(self,rec_num):    
         k, i, j = kij_from_icrl(rec_num,self.nlay,self.nrow,self.ncol)
-        print 'node=', rec_num, 'row=', i, ' col=', j, 'lay=', k
+        if self.verbose == True:
+            print 'node=', rec_num, 'row=', i, ' col=', j, 'lay=', k
         gage_record = numpy.zeros((self.items+1))#items plus tottime
         while True:
             totim,kstp,kper,h,success = self.next()
@@ -803,14 +819,16 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
         self.file.seek(iposition)
         totim,kstp,kper,h,success = self.next()
         if success == True:
-            #print totim,kstp,kper,True
+            if self.verbose == True:
+                print totim,kstp,kper,True
             return totim,kstp,kper,h,True
         else:
             return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
 
     def get_time_gage(self,rec_num):
         k, i, j = kij_from_icrl(rec_num,self.nlay,self.nrow,self.ncol)
-        print 'node=', rec_num, 'row=', i, ' col=', j, 'lay=', k
+        if self.verbose == True:
+            print 'node=', rec_num, 'row=', i, ' col=', j, 'lay=', k
         gage_record = numpy.zeros((self.items+1))#items plus tottime
         #--find offset to position
         ilen = self.get_point_offset(k,i,j)
@@ -848,10 +866,11 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
 
 class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
     'Reads binary cell by cell output from MODFLOW cbb file'
-    def __init__(self,nlay,nrow,ncol,filename):
+    def __init__(self,nlay,nrow,ncol,filename,verbose=False):
         #initialize grid information
         self.assign_rowcollay(nlay,nrow,ncol)
         self.flux = numpy.empty((self.nlay, self.nrow, self.ncol))
+        self.verbose = verbose
         #open binary head file
         self.file=open(filename,'rb')
         #set skip
@@ -876,7 +895,8 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
                 delt = self.read_real()
                 pertim = self.read_real()
                 totim = self.read_real()
-            #print kstp,kper,text,nlay,nrow,ncol,ubdsvtype,delt,pertim,totim,True
+            if self.verbose == True:
+                print kstp,kper,text,nlay,nrow,ncol,ubdsvtype,delt,pertim,totim,True
             return kstp,kper,text,nlay,nrow,ncol,ubdsvtype,delt,pertim,totim,True
         except:
 #            return kstp,kper,text,nlay,nrow,ncol,ubdsvtype,delt,pertim,totim,False
@@ -933,9 +953,12 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
         kstp,kper,text,nlay,nrow,ncol,ubdsvtype,delt,pertim,totim,success=self.read_header()
         if(success):
             self.read_cbbdata(nlay,nrow,ncol,ubdsvtype,text)
+            if self.verbose == True:
+                print text,totim,kstp,kper
             return text,totim,kstp,kper,True
         else:
-            print 'MODFLOW_CBB object.read_next_cbb() reached end of file.'
+            if self.verbose == True:
+                print 'MODFLOW_CBB object.read_next_cbb() reached end of file.'
             return '',0.0,0,0,False
 
     def read_next_fluxtype(self,fluxtype):
@@ -1012,10 +1035,11 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
     
 class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
     'Reads binary concentration output from MT3D concentration file'
-    def __init__(self,nlay,nrow,ncol,filename):
+    def __init__(self,nlay,nrow,ncol,filename,verbose=False):
         #initialize grid information
         self.assign_rowcollay(nlay,nrow,ncol)
         self.h = numpy.zeros((self.nlay, self.nrow, self.ncol),dtype='float')+1.0E+32
+        self.verbose = verbose
         #open binary head file
         self.file=open(filename,'rb')
         self.times = self.time_list()
@@ -1088,7 +1112,8 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
              assert NROW==self.nrow, 'NROW not consistent with binary heads file.'
              self.h[ILAY-1, :, :] = self.read_layerconcens()
          else:
-             print 'MT3DMS_Concentration object.read_next_heads() reached end of file.'
+             if self.verbose == True:
+                print 'MT3DMS_Concentration object.read_next_heads() reached end of file.'
              return 0., numpy.zeros((self.nlay, self.nrow, self.ncol),dtype='float')+1.0E+32, 0,0,False
      #print 'MT3DMS concentration read (ntrans,kstp,kper,time): ',NTRANS,KSTP,KPER,TOTIM 
      self.kper = KPER
@@ -1121,13 +1146,14 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
 
 class MODFLOW_HYDMOD(MFReadBinaryStatements):
     'Reads binary head output from MODFLOW head file'
-    def __init__(self,filename,double=False,slurp=False):
+    def __init__(self,filename,double=False,slurp=False,verbose=False):
         '''slurp is a short cut to read all output using numpy fromfile()
         if you use it, you don't need to read times
         '''
         #initialize class information
         self.skip = True
         self.double = bool(double)
+        self.verbose = verbose
         #--open binary head file
         self.file=open(filename,'rb')
         #--NHYDTOT,ITMUNI
@@ -1146,13 +1172,13 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
             cid = self.read_hyd_text()
             hydlbl.append( cid )
         self.hydlbl = numpy.array( hydlbl )
-        #print self.hydlbl
+        if self.verbose == True:
         if not slurp:
             #--set position
             self.datastart = self.file.tell()
             #get times
             self.times = self.time_list()
-       
+
 
     def get_time_list(self):
         return self.times
@@ -1214,7 +1240,9 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
                 else:
                     self.v[idx] = self.read_real()
         else:
-            print 'MODFLOW_HYDMOD object.next() reached end of file.'
+            if self.verbose == True:
+                if self.verbose == True:
+                    print 'MODFLOW_HYDMOD object.next() reached end of file.'
             self.v.fill(1.0E+32)
         return totim,self.v,success
 
@@ -1233,7 +1261,8 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
         try:
             idx = int( record ) - 1
             if idx >= 0 and idx < self.nhydtot:
-                print 'retrieving HYDMOD observation record [{0}]'.format( idx+1 )
+                if self.verbose == True:
+                    print 'retrieving HYDMOD observation record [{0}]'.format( idx+1 )
             else:
                 print 'Error: HYDMOD observation record {0} not found'.format( record.strip().lower() )
         except:
@@ -1244,7 +1273,8 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
                     tcid = cid
                 if record.strip().lower() == tcid.strip().lower():
                     idx = icnt
-                    print 'retrieving HYDMOD observation record [{0}] {1}'.format( idx+1, record.strip().lower() )
+                    if self.verbose == True:
+                        print 'retrieving HYDMOD observation record [{0}] {1}'.format( idx+1, record.strip().lower() )
                     break
             if idx == -1:
                 print 'Error: HYDMOD observation record {0} not found'.format( record.strip().lower() )
