@@ -246,7 +246,8 @@ class smp():
         for line in f:
             if line.strip() == '':
                 break                        
-            site = line.split()[0].lower()
+#            site = line.split()[0].lower()
+            site = line.split()[0]
             if site not in site_list:
                 site_list.append(site)     
             #pline = self.parse_line(line)
