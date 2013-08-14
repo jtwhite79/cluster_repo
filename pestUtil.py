@@ -272,17 +272,19 @@ class smp():
         '''                           
         if site.upper() != 'ALL':                        
             f = self.read_to(self.site_index,site)
-            record = []
-            while True:
-                line = f.readline()
-                if line.strip() == '':
-                    break                        
-                pline = self.parse_line(line)                                   
-                if pline[self.site_index] != site:
-                    break
-                record.append(pline[1:])
-            f.close()
-            record = np.array(record)
+#            record = []
+#            while True:
+#                line = f.readline()
+#                if line.strip() == '':
+#                    break                        
+#                pline = self.parse_line(line)                                   
+#                if pline[self.site_index] != site:
+##                    break
+#                    continue
+#                record.append(pline[1:])
+#            f.close()
+#            record = np.array(record)
+            record = self.get_sitedata(site)
             if self.pandas:                
                 return pandas.Series(record[:,1],index=record[:,0],name=site)
             else:
@@ -505,6 +507,21 @@ class smp():
                 f.seek(last)
                 return f
         
+    def get_sitedata(self,site):
+        f = open(self.fname,'r')
+        record = []
+        while True:
+            line = f.readline()
+            if line.strip() == '':
+                break                        
+            raw = line.strip().split()
+            if raw[self.site_index] != site:
+                continue
+            pline = self.parse_line(line)                                   
+            record.append(pline[1:])
+        f.close()
+        return np.array(record)
+
     def save(self,fname,dropna=False):
         if len(self.records) > 0:
             f = open(fname,'w')

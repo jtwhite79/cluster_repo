@@ -359,9 +359,11 @@ class SWR_Record(SWRReadBinaryStatements):
         list = ['totim','dt','kper','kstp','swrstp','success']
         return list
 
-    def get_item_number(self,value):
+    def get_item_number(self,value,isTimeSeriesOutput=True):
         l = self.get_item_list()
         ioff = 6
+        if isTimeSeriesOutput == False:
+            ioff = 0
         try:
             i = l.index(value.lower())
             i += ioff
