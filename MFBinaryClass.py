@@ -877,7 +877,12 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
         self.file=open(filename,'rb')
         #set skip
         self.skip = False
- 
+        self.unique_items, self.all_times = self.get_all_times()
+        sys.stdout.write( 'CBC data types\n' )
+        for item in self.unique_items:
+            sys.stdout.write( '{0} \n'.format( item ) )
+        sys.stdout.write( '\n' )
+        
     def get_time_list(self,fluxtype):
         self.times = self.time_list(fluxtype)
         return self.times
@@ -943,11 +948,17 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
             for i in range(nlist):
                 icrl=self.read_integer()
                 Q=self.read_real()
-                k,i,j=kij_from_icrl(icrl,nlay,nrow,ncol)
-                temp[k-1,i-1,j-1] = temp[k-1,i-1,j-1] + Q
+                if self.skip == False:
+                    k,i,j=kij_from_icrl(icrl,nlay,nrow,ncol)
+                    temp[k-1,i-1,j-1] = temp[k-1,i-1,j-1] + Q
                 if (naux > 0):
-                    for j in range(naux):
-                        val[j]=self.read_real()
+                    if self.skip == True:
+                        for j in range(naux):
+                            v = self.read_real()
+                    else:
+                        val = []
+                        for j in range(naux):
+                            val.append( self.read_real() )
         self.flux=temp
         return
 
@@ -1006,25 +1017,60 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
             print text,'totim:',totim
         return
 
-    def time_list(self,fluxtype):
+    def get_all_times(self):
         self.skip = True
-        if fluxtype==None:
-            self.file.seek(0)
-            text,totim,kstp,kper,success=self.next()
-            fluxtype = text
         self.file.seek(0)
-        times = []
+        all_times = []
+        idx = 0
         while True:
             current_position = self.file.tell()
             text,totim,kstp,kper,success=self.next()
             if success == True:
-                if text==fluxtype:
-                    times.append([totim,kstp,kper,current_position])
+                idx += 1
+                v = divmod( float(idx), 100. )
+                if v[1] == 0.0:
+                    sys.stdout.write('.')
+                all_times.append([text,totim,kstp,kper,current_position])
             else: 
                 self.file.seek(0)
-                times = numpy.array( times )
+                sys.stdout.write('\n')
+                unique_text = []
+                for t in all_times:
+                    if t[0] not in unique_text:
+                        unique_text.append( t[0] )
                 self.skip = False
-                return times
+                return (unique_text,all_times)
+
+    def time_list(self,fluxtype=None):
+        if fluxtype == None:
+            fluxtype = self.all_times[0][0]
+        if fluxtype not in self.unique_items:
+            return np.array([0,0,0,0])
+        times = []
+        for [text,totim,kstp,kper,current_position] in self.all_times:
+            if text == fluxtype:
+                    times.append([totim,kstp,kper,current_position])
+        times = numpy.array( times )
+        return times
+#           
+#        self.skip = True
+#        if fluxtype==None:
+#            self.file.seek(0)
+#            text,totim,kstp,kper,success=self.next()
+#            fluxtype = text
+#        self.file.seek(0)
+#        times = []
+#        while True:
+#            current_position = self.file.tell()
+#            text,totim,kstp,kper,success=self.next()
+#            if success == True:
+#                if text==fluxtype:
+#                    times.append([totim,kstp,kper,current_position])
+#            else: 
+#                self.file.seek(0)
+#                times = numpy.array( times )
+#                self.skip = False
+#                return times
 
     def get_array(self,iposition):
         self.file.seek(iposition)
