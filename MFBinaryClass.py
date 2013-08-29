@@ -887,6 +887,9 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
         self.times = self.time_list(fluxtype)
         return self.times
 
+    def get_flux_item_list(self):
+        return (self.unique_items)
+
     def read_header(self):
         try:
             kstp=self.read_integer()
