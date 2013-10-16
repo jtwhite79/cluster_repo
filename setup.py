@@ -3,7 +3,7 @@ from distutils.core import setup
 # To use:
 #	   python setup.py bdist --format=wininst
 
-setup(name='flopy',
+setup(name='cluster_repo',
       version='1.37',
       author="Jeremy T. White and Joseph D. Hughes",
       author_email="jwhite@usgs.gov or jdhughes@usgs.gov",
