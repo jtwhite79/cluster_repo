@@ -4,6 +4,7 @@
 #--libraries
 import numpy as np
 import os
+import platform
 import math
 import sys
 import gc
@@ -25,6 +26,11 @@ def TestDirExist(ctest):
             sys.stdout.write( 'creating directory path...\n  "{0}"\n'.format( os.path.dirname( f ) ) )
             os.makedirs(d)
 
+def ConvertFilePath(cpath):
+    if platform.system() != 'Windows':
+        return cpath.replace('\\','/')
+    else:
+        return cpath.replace('/','\\')
 
 def mapBndCellsArray(nrow,ncol,bndcells,**kwargs):  
     try:
