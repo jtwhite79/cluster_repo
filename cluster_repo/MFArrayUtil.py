@@ -103,7 +103,7 @@ def loadArrayFromFile(nrow,ncol,file,ctype=None):
     data.resize(nrow,ncol)
     return(data)
 
-def loadRealArrayFromBinaryFile(nrow,ncol,file,realbyte=4):
+def loadRealArrayFromBinaryFile(nrow,ncol,file,realbyte=4,header_type=None):
     '''
     read 2darray from file
     file(str) = path and filename
@@ -120,6 +120,18 @@ def loadRealArrayFromBinaryFile(nrow,ncol,file,realbyte=4):
 #       assert os.path.exists(file)
         f = file
         return False, np.zeros( (nrow,ncol), dtype_np )
+    # read header information
+    if header_type is not None:
+        if header_type == 'head':
+            header_dtype = np.dtype([('kstp','i4'),('kper','i4'),\
+                                     ('pertim','f4'),('totim','f4'),\
+                                     ('text','a16'),\
+                                     ('ncol','i4'),('nrow','i4'),('ilay','i4')])
+        elif self.header_type == 'ucn':
+            header_dtype = np.dtype([('ntrans','i4'),('kstp','i4'),('kper','i4'),\
+                                     ('totim','f4'),('text','a16'),\
+                                     ('ncol','i4'),('nrow','i4'),('ilay','i4')])
+        header=np.fromfile(file=f, dtype=header_dtype, count=1)
     
     data=np.fromfile(file=f, dtype=tsize, count=nrow*ncol)
     data.shape=(nrow,ncol)
