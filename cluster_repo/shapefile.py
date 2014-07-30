@@ -158,6 +158,27 @@ def load_attrib_idx(shape_name):
         attrib_idx[item[0]] = i
     return attrib_idx
 
+'''
+ function to perform a selection on shapefile shapes using records
+'''
+def buildShapefileSelection(shapes,records,cid=None,tag=None):
+    sel = []
+    gis_items = len( shapes )
+    #print gis_items,cid
+    for idx in xrange(0,gis_items):
+        if cid is not None:
+            on_tag = records[cid][idx]
+            #print on_tag
+            if tag is not None:
+                if on_tag != tag:
+                    continue
+        p = shapes[idx].points
+        xs,ys = [],[]
+        for [x,y] in p:
+            xs.append(x)
+            ys.append(y)
+        sel.append(np.array([xs,ys]))
+    return (sel)
 
 
 class _Array(array.array):
