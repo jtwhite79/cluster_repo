@@ -1,6 +1,6 @@
 import sys
-import numpy
-import struct
+import numpy as np
+import struct as strct
 from pylab import ma, flipud
 import string
 import math
@@ -48,82 +48,82 @@ def MFarray_to_plotarray(mfarray,maskvalue,orientation,rcl):
     return Z
 
 class SWRReadBinaryStatements:
-    integer = numpy.int32
-    real = numpy.float64
-    character = numpy.uint8
+    integer = np.int32
+    real = np.float64
+    character = np.uint8
     integerbyte = 4
     realbyte = 8
     textbyte = 4
     def read_integer(self):
-        intvalue=struct.unpack('i',self.file.read(1*SWRReadBinaryStatements.integerbyte))[0]
+        intvalue=strct.unpack('i',self.file.read(1*SWRReadBinaryStatements.integerbyte))[0]
         return intvalue
     def read_real(self):
-        realvalue=struct.unpack('d',self.file.read(1*SWRReadBinaryStatements.realbyte))[0]
+        realvalue=strct.unpack('d',self.file.read(1*SWRReadBinaryStatements.realbyte))[0]
         return realvalue
     def read_text(self):
-        #textvalue=struct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
-        textvalue=numpy.fromfile(file = self.file, dtype=SWRReadBinaryStatements.character, count=16).tostring()
+        #textvalue=strct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
+        textvalue=np.fromfile(file = self.file, dtype=SWRReadBinaryStatements.character, count=16).tostring()
         return textvalue
     def read_obs_text(self,nchar=20):
-        #textvalue=struct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
-        textvalue=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=nchar).tostring()
+        #textvalue=strct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
+        textvalue=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=nchar).tostring()
         return textvalue
     def read_record(self):
-#        x = numpy.fromfile(file=self.file,dtype=SWRReadBinaryStatements.real,count=self.nrecord*self.items)
+#        x = np.fromfile(file=self.file,dtype=SWRReadBinaryStatements.real,count=self.nrecord*self.items)
 #        x.resize(self.nrecord,self.items)
         if self.skip == True:
             lpos = self.file.tell() + ( self.nrecord*self.items*SWRReadBinaryStatements.realbyte )
             self.file.seek(lpos)
-            x = numpy.zeros((self.nrecord*self.items),SWRReadBinaryStatements.real)
+            x = np.zeros((self.nrecord*self.items),SWRReadBinaryStatements.real)
         else:
-            x = numpy.fromfile(file=self.file,dtype=SWRReadBinaryStatements.real,count=self.nrecord*self.items)
+            x = np.fromfile(file=self.file,dtype=SWRReadBinaryStatements.real,count=self.nrecord*self.items)
         x.resize(self.nrecord,self.items)
         return x
     def read_items(self):
-#        x = numpy.fromfile(file=self.file,dtype=SWRReadBinaryStatements.real,count=self.items)
+#        x = np.fromfile(file=self.file,dtype=SWRReadBinaryStatements.real,count=self.items)
 #        return x
         if self.skip == True:
             lpos = self.file.tell() + ( self.items * SWRReadBinaryStatements.realbyte )
             self.file.seek(lpos)
-            x = numpy.zeros((self.items),SWRReadBinaryStatements.real)
+            x = np.zeros((self.items),SWRReadBinaryStatements.real)
         else:
-            x = numpy.fromfile(file=self.file,dtype=SWRReadBinaryStatements.real,count=self.items)
+            x = np.fromfile(file=self.file,dtype=SWRReadBinaryStatements.real,count=self.items)
         return x
     def read_1dintegerarray(self):
-        i = numpy.fromfile(file=self.file,dtype=SWRReadBinaryStatements.integer,count=self.nrecord)
+        i = np.fromfile(file=self.file,dtype=SWRReadBinaryStatements.integer,count=self.nrecord)
         return i
 
 
 class MFReadBinaryStatements:
     'Class of methods for reading MODFLOW binary files'
     #--byte definition
-    integer=numpy.int32
-    real=numpy.float32
-    double=numpy.float64
-    character=numpy.uint8
+    integer=np.int32
+    real=np.float32
+    double=np.float64
+    character=np.uint8
     integerbyte=4
     realbyte=4
     doublebyte=8
     textbyte=1
     def read_integer(self):
-        intvalue=struct.unpack('i',self.file.read(1*MFReadBinaryStatements.integerbyte))[0]
+        intvalue=strct.unpack('i',self.file.read(1*MFReadBinaryStatements.integerbyte))[0]
         return intvalue
     def read_real(self):
-        realvalue=struct.unpack('f',self.file.read(1*MFReadBinaryStatements.realbyte))[0]
+        realvalue=strct.unpack('f',self.file.read(1*MFReadBinaryStatements.realbyte))[0]
         return realvalue
     def read_double(self):
-        doublevalue=struct.unpack('f',self.file.read(1*MFReadBinaryStatements.doublebyte))[0]
+        doublevalue=strct.unpack('f',self.file.read(1*MFReadBinaryStatements.doublebyte))[0]
         return doublevalue
     def read_text(self):
-        #textvalue=struct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
-        textvalue=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=16).tostring()
+        #textvalue=strct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
+        textvalue=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=16).tostring()
         return textvalue
     def read_hyd_text(self,nchar=20):
-        #textvalue=struct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
-        textvalue=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=nchar).tostring()
+        #textvalue=strct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
+        textvalue=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=nchar).tostring()
         return textvalue
     def read_3drealarray(self):
-        x=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.real, count=self.nlay*self.nrow*self.ncol)
+        x=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.real, count=self.nlay*self.nrow*self.ncol)
         x.shape=(self.nlay,self.nrow,self.ncol)
         return x
     def skip_3drealarray(self):
@@ -131,7 +131,7 @@ class MFReadBinaryStatements:
         self.file.seek(lpos)
         return True
     def read_2drealarray(self):
-        x=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.real, count=self.nrow*self.ncol)
+        x=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.real, count=self.nrow*self.ncol)
         x.shape=(self.nrow,self.ncol)
         return x
     def skip_2drealarray(self):
@@ -139,7 +139,7 @@ class MFReadBinaryStatements:
         self.file.seek(lpos)
         return True
     def read_2dintegerarray(self):
-        i=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.integer, count=self.nrow*self.ncol)
+        i=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.integer, count=self.nrow*self.ncol)
         i.shape=(self.nrow,self.ncol)
         return i
     def skip_2dintegerarray(self):
@@ -147,7 +147,7 @@ class MFReadBinaryStatements:
         self.file.seek(lpos)
         return True
     def read_1drealarray(self,i):
-        x=numpy.fromfile(file = self.file, dtype=MFReadBinaryStatements.real, count=i)
+        x=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.real, count=i)
         return x
 
 class MF_Discretization:
@@ -169,14 +169,14 @@ class SWR_BinaryObs(SWRReadBinaryStatements):
         self.file=open(filename,'rb')
         #--NOBS
         self.nobs=self.read_integer()
-        self.v = numpy.empty((self.nobs),dtype='float')
+        self.v = np.empty((self.nobs),dtype='float')
         self.v.fill(1.0E+32)
         #--read obsnames
         obsnames = []
         for idx in xrange(0,self.nobs):
             cid = self.read_obs_text()
             obsnames.append( cid )
-        self.obsnames = numpy.array( obsnames )
+        self.obsnames = np.array( obsnames )
         #print self.obsnames
         #--set position
         self.datastart = self.file.tell()
@@ -207,7 +207,7 @@ class SWR_BinaryObs(SWRReadBinaryStatements):
                 times.append([totim,current_position])
             else: 
                 self.file.seek(self.datastart)
-                times = numpy.array( times )
+                times = np.array( times )
                 self.skip = False
                 return times
 
@@ -256,7 +256,7 @@ class SWR_BinaryObs(SWRReadBinaryStatements):
                     if self.verbose == True:
                         print 'retrieving SWR observation record [{0}] {1}'.format( idx+1, record.strip().lower() )
                     break
-        gage_record = numpy.zeros((2))#tottime plus observation
+        gage_record = np.zeros((2))#tottime plus observation
         if idx != -1 and idx < self.nobs:
             #--find offset to position
             ilen = self.get_point_offset(idx)
@@ -264,11 +264,11 @@ class SWR_BinaryObs(SWRReadBinaryStatements):
             for time_data in self.times:
                 self.file.seek(long(time_data[1])+ilen)
                 v=self.read_real()
-                this_entry = numpy.array([float(time_data[0])])
-                this_entry = numpy.hstack((this_entry,v))
-                gage_record = numpy.vstack((gage_record,this_entry))
+                this_entry = np.array([float(time_data[0])])
+                this_entry = np.hstack((this_entry,v))
+                gage_record = np.vstack((gage_record,this_entry))
             #delete the first 'zeros' element
-            gage_record = numpy.delete(gage_record,0,axis=0)
+            gage_record = np.delete(gage_record,0,axis=0)
         return gage_record
 
     def get_point_offset(self,ipos):
@@ -322,7 +322,7 @@ class SWR_Record(SWRReadBinaryStatements):
             self.nrgout = self.read_integer()
         self.nrecord = self.read_integer()
         self.items = self.get_num_items()
-        self.null_record = numpy.zeros((self.nrecord,self.items)) + 1.0E+32
+        self.null_record = np.zeros((self.nrecord,self.items)) + 1.0E+32
         #
         self.missingData = -9999.9
         self.dataAvailable = True
@@ -334,9 +334,9 @@ class SWR_Record(SWRReadBinaryStatements):
                 print self.connectivity
         #--initialize reachlayers and nqaqentries for qaq data
         if self.type == 'qaq':
-            self.reachlayers = numpy.zeros( (self.nrecord), numpy.int )
+            self.reachlayers = np.zeros( (self.nrecord), np.int )
             self.nqaqentries = 0
-        self.qaq_dtype = numpy.dtype([('layer','i4'),\
+        self.qaq_dtype = np.dtype([('layer','i4'),\
                                       ('bottom','f8'),('stage','f8'),\
                                       ('depth','f8'),('head','f8'),\
                                       ('wetper','f8'),('cond','f8'),\
@@ -353,7 +353,7 @@ class SWR_Record(SWRReadBinaryStatements):
         return self.times
     
     def read_connectivity(self):
-        conn = numpy.zeros( (self.nrecord,3), numpy.int )
+        conn = np.zeros( (self.nrecord,3), np.int )
         icount = 0
         for nrg in range(0,self.nrgout):
             nconn = self.read_integer()
@@ -424,7 +424,7 @@ class SWR_Record(SWRReadBinaryStatements):
         n = r.shape[0]
         if n < 1:
             return self.null_record
-        v = numpy.zeros( (n), numpy.float )
+        v = np.zeros( (n), np.float )
         for i  in range(0,n):
             v[i]  = r[i,ipos] * scale
         return v
@@ -436,6 +436,8 @@ class SWR_Record(SWRReadBinaryStatements):
                 for i in range(0,self.nrecord):
                     self.reachlayers[i] = self.read_integer() 
                     self.nqaqentries += self.reachlayers[i]
+                    #print i+1, self.reachlayers[i]
+                #print self.nqaqentries 
             except:
                 if self.verbose == True:
                     sys.stdout.write('\nCould not read reachlayers')
@@ -486,24 +488,26 @@ class SWR_Record(SWRReadBinaryStatements):
                         return previous
                     else: previous = this_record
     
-    def get_gage(self,rec_num=0,iconn=0):    
+    def get_gage(self,rec_num=0,iconn=0,rec_lay=1):    
         if self.type == 'qaq':
-            gage_record = numpy.zeros((self.items+8))#items plus 6 header values, reach number, and layer value
+            gage_record = np.zeros((self.items+6))#items plus 6 header values, reach number, and layer value
         else:
-            gage_record = numpy.zeros((self.items+6))#items plus 6 header values
+            gage_record = np.zeros((self.items+6))#items plus 6 header values
         while True:
             totim,dt,kper,kstp,swrstp,success,r = self.next()
             if success == True:
-                this_entry = numpy.array([totim,dt,kper,kstp,swrstp,success])
+                this_entry = np.array([totim,dt,kper,kstp,swrstp,success])
                 irec = rec_num - 1
                 #find correct entry for record and layer
                 if self.type == 'qaq':
                     ifound = 0
-                    ilen = numpy.shape(r)[0]
+                    ilay = rec_lay
+                    ilen = np.shape(r)[0]
+                    #print np.shape(r)
                     for i in range(0,ilen):
                         ir = int(r[i,0])
                         il = int(r[i,1])
-                        if ir == rec_num and il == self.type:
+                        if ir == rec_num and il == ilay:
                             ifound = 1
                             irec = i
                             break
@@ -520,19 +524,25 @@ class SWR_Record(SWRReadBinaryStatements):
                             break
                     if ifound < 1:
                         r[irec,:] = 0.0
-                    
-                this_entry = numpy.hstack((this_entry,r[irec]))
-                gage_record = numpy.vstack((gage_record,this_entry))
+                
+                #if self.type == 'qaq':
+                #    print 'shape gage_record {}'.format(gage_record.shape)
+                #    print gage_record
+                #    print 'shape this_entry {}'.format(this_entry.shape)
+                #    print this_entry
+                   
+                this_entry = np.hstack((this_entry,r[irec]))
+                gage_record = np.vstack((gage_record,this_entry))
 
             else: 
-                gage_record = numpy.delete(gage_record,0,axis=0) #delete the first 'zeros' element
+                gage_record = np.delete(gage_record,0,axis=0) #delete the first 'zeros' element
                 return gage_record
                      
     def next(self):
         totim,dt,kper,kstp,swrstp,success = self.read_header()        
         if success == False: 
             if self.verbose == True:
-                print 'SWR_Stage.next() object reached end of file'
+                print 'SWR_Record.next() object reached end of file'
             return 0.0,0.0,0,0,0,False,self.null_record
         else:
             if self.type == 'qaq':
@@ -543,14 +553,14 @@ class SWR_Record(SWRReadBinaryStatements):
         return totim,dt,kper,kstp,swrstp,True,r
 
     def read_qaq(self):
-        x = numpy.zeros((self.nqaqentries,self.items), SWRReadBinaryStatements.real)                
+        x = np.zeros((self.nqaqentries,self.items), SWRReadBinaryStatements.real)                
         if self.skip == True:
             bytes = self.nqaqentries * (SWRReadBinaryStatements.integerbyte + 8*SWRReadBinaryStatements.realbyte)
             lpos = self.file.tell() + ( bytes )
             self.file.seek(lpos)
         else:
             qaq_list = self.get_item_list()
-            bd = numpy.fromfile(self.file,dtype=self.qaq_dtype,count=self.nqaqentries)
+            bd = np.fromfile(self.file,dtype=self.qaq_dtype,count=self.nqaqentries)
             ientry = 0
             for irch in xrange(self.nrecord):
                 klay = self.reachlayers[irch]
@@ -559,6 +569,7 @@ class SWR_Record(SWRReadBinaryStatements):
                     ientry += 1
             for idx, k in enumerate(qaq_list[1:]):
                 x[:,idx+1] = bd[k]
+        #print 'shape x: {}'.format(x.shape)
         return x
         
     
@@ -586,7 +597,7 @@ class SWR_Record(SWRReadBinaryStatements):
                 times.append([totim,dt,kper,kstp,swrstp,current_position])
             else: 
                 self.file.seek(self.datastart)
-                times = numpy.array( times )
+                times = np.array( times )
                 self.skip = False
                 sys.stdout.write('\n')
                 return times
@@ -640,7 +651,7 @@ class SWR_Record(SWRReadBinaryStatements):
             sys.stdout.write('MFBinaryClass::get_time_gage can not be used to extract QAQ data\n')
             sys.exit( 1 )
         num_records = self.items+6 #items plus 6 header values
-        gage_record = numpy.zeros((num_records),numpy.float)
+        gage_record = np.zeros((num_records),np.float)
         #--find offset to position
         ilen = long(0)
         if rec_num > 0:
@@ -666,15 +677,15 @@ class SWR_Record(SWRReadBinaryStatements):
                     self.file.seek(long(time_data[5])+ilen)
                     r = self.read_items()
                 else:
-                    r = numpy.empty((self.items),numpy.float)
+                    r = np.empty((self.items),np.float)
                     r.fill(self.missingData)
                 #--push the data to the data structure
-                this_entry = numpy.array([totim,dt,kper,kstp,swrstp,success])
+                this_entry = np.array([totim,dt,kper,kstp,swrstp,success])
                 #--update this_entry and current gage_record    
-                this_entry = numpy.hstack((this_entry,r))
-                gage_record = numpy.vstack((gage_record,this_entry))
+                this_entry = np.hstack((this_entry,r))
+                gage_record = np.vstack((gage_record,this_entry))
         #--delete first empty entry and return gage_record
-        gage_record = numpy.delete(gage_record,0,axis=0) #delete the first 'zeros' element
+        gage_record = np.delete(gage_record,0,axis=0) #delete the first 'zeros' element
         return gage_record
        
         
@@ -684,7 +695,7 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
     def __init__(self,nlay,nrow,ncol,filename,verbose=False):
         #initialize grid information
         self.assign_rowcollay(nlay,nrow,ncol)
-        self.h = numpy.zeros((self.nlay, self.nrow, self.ncol)) + 1.0E+32
+        self.h = np.zeros((self.nlay, self.nrow, self.ncol)) + 1.0E+32
         self.items = self.get_num_items()
         self.x0 = 0.0
         self.y0 = 0.0
@@ -710,10 +721,10 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
         self.dx = dx
         self.dy = dy
         #--set x and y coordinate for each row and column
-        self.x = numpy.empty( (self.nrow+1,self.ncol+1) )
-        self.y = numpy.empty( (self.nrow+1,self.ncol+1) )
-        xt = numpy.zeros( self.ncol+1 )
-        yt = numpy.zeros( self.nrow+1 )
+        self.x = np.empty( (self.nrow+1,self.ncol+1) )
+        self.y = np.empty( (self.nrow+1,self.ncol+1) )
+        xt = np.zeros( self.ncol+1 )
+        yt = np.zeros( self.nrow+1 )
         xt[0] = self.x0
         for j in range(1,self.ncol+1):
                 xt[j] = xt[j-1] + self.dx
@@ -774,7 +785,7 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
     def read_layerheads(self):
         if self.skip == True:
             success = self.skip_2drealarray()
-            hl = numpy.zeros((self.nrow*self.ncol),numpy.float)
+            hl = np.zeros((self.nrow*self.ncol),np.float)
         else:
             hl = self.read_2drealarray()
         hl.shape=(self.nrow,self.ncol)
@@ -794,7 +805,7 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
             else:
                 if self.verbose == True:
                     print 'MODFLOW_Head object.next() reached end of file.'
-                return 0.,0,0, numpy.zeros((self.nlay, self.nrow, self.ncol),\
+                return 0.,0,0, np.zeros((self.nlay, self.nrow, self.ncol),\
                 dtype='float')+1.0E+32,False
         self.KSTP=kstp
         self.KPER=kper
@@ -816,7 +827,7 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
                             print totim,kstp,kper,True
                         return totim,kstp,kper,h,True
                 else:
-                    return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
+                    return 0.0,0,0,np.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
         except:
             try:	
                 target_totim = float(args[0])
@@ -826,7 +837,7 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
                         if target_totim <= totim:
                             return totim,kstp,kper,h,True
                     else:
-                        return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self.ncol),dtype='float')+1.0E+32,False
+                        return 0.0,0,0,np.zeros((self.nlay,self.nrow,self.ncol),dtype='float')+1.0E+32,False
         	
             except:
                 #--get the last successful record
@@ -842,16 +853,16 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
         k, i, j = kij_from_icrl(rec_num,self.nlay,self.nrow,self.ncol)
         if self.verbose == True:
             print 'node=', rec_num, 'row=', i, ' col=', j, 'lay=', k
-        gage_record = numpy.zeros((self.items+1))#items plus tottime
+        gage_record = np.zeros((self.items+1))#items plus tottime
         while True:
             totim,kstp,kper,h,success = self.next()
             if success == True:
-                #print totim,numpy.shape(h[rec_num-1])
-                this_entry = numpy.array([totim])
-                this_entry = numpy.hstack((this_entry,h[k-1,i-1,j-1]))
-                gage_record = numpy.vstack((gage_record,this_entry))
+                #print totim,np.shape(h[rec_num-1])
+                this_entry = np.array([totim])
+                this_entry = np.hstack((this_entry,h[k-1,i-1,j-1]))
+                gage_record = np.vstack((gage_record,this_entry))
             else: 
-                gage_record = numpy.delete(gage_record,0,axis=0) #delete the first 'zeros' element
+                gage_record = np.delete(gage_record,0,axis=0) #delete the first 'zeros' element
                 return gage_record
 
     def rewind_file(self):    
@@ -879,7 +890,7 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
             else: 
                 sys.stdout.write('\n')
                 self.file.seek(self.datastart)
-                times = numpy.array( times )
+                times = np.array( times )
                 self.skip = False
                 return times
 
@@ -891,24 +902,24 @@ class MODFLOW_Head(MFReadBinaryStatements,MF_Discretization):
                 print totim,kstp,kper,True
             return totim,kstp,kper,h,True
         else:
-            return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
+            return 0.0,0,0,np.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
 
     def get_time_gage(self,rec_num):
         k, i, j = kij_from_icrl(rec_num,self.nlay,self.nrow,self.ncol)
         if self.verbose == True:
             print 'node=', rec_num, 'row=', i, ' col=', j, 'lay=', k
-        gage_record = numpy.zeros((self.items+1))#items plus tottime
+        gage_record = np.zeros((self.items+1))#items plus tottime
         #--find offset to position
         ilen = self.get_point_offset(k,i,j)
         #--get data
         for time_data in self.times:
             self.file.seek(long(time_data[3])+ilen)
             v=self.read_real()
-            this_entry = numpy.array([float(time_data[0])])
-            this_entry = numpy.hstack((this_entry,v))
-            gage_record = numpy.vstack((gage_record,this_entry))
+            this_entry = np.array([float(time_data[0])])
+            this_entry = np.hstack((this_entry,v))
+            gage_record = np.vstack((gage_record,this_entry))
         #delete the first 'zeros' element
-        gage_record = numpy.delete(gage_record,0,axis=0)
+        gage_record = np.delete(gage_record,0,axis=0)
         return gage_record
 
     def get_point_offset(self,kpos,ipos,jpos):
@@ -937,7 +948,7 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
     def __init__(self,nlay,nrow,ncol,filename,verbose=False):
         #initialize grid information
         self.assign_rowcollay(nlay,nrow,ncol)
-        self.flux = numpy.empty((self.nlay, self.nrow, self.ncol))
+        self.flux = np.empty((self.nlay, self.nrow, self.ncol))
         self.verbose = verbose
         #open binary head file
         self.file=open(filename,'rb')
@@ -979,7 +990,7 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
             return 0,0,'',0,0,0,0,0.0,0.0,0.0,False
 
     def read_cbbdata(self,nlay,nrow,ncol,ubdsvtype,text):
-        temp=numpy.zeros((nlay,nrow,ncol))
+        temp=np.zeros((nlay,nrow,ncol))
         if(ubdsvtype < 2):
             if self.skip == True:
                 success = self.skip_3drealarray()
@@ -1054,7 +1065,7 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
 #				string.strip(string.ljust(fluxtype,16)))) == 0:
 					return self.flux,totim,True
             else:
-                return numpy.empty((self.nlay,self.nrow,self.ncol)),0.,False
+                return np.empty((self.nlay,self.nrow,self.ncol)),0.,False
                 
     def get_record(self,fluxtype,*args):
 		while(True):
@@ -1077,7 +1088,7 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
 				        except:
 				            return self.flux,totim,True
 			else:
-				return numpy.zeros((self.nlay,self.nrow,self.ncol),dtype='float')+1.0E+32,0.,False
+				return np.zeros((self.nlay,self.nrow,self.ncol),dtype='float')+1.0E+32,0.,False
 
     def print_cbb_info(self):
         success=True
@@ -1120,7 +1131,7 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
         for [text,totim,kstp,kper,current_position] in self.all_times:
             if text == fluxtype:
                     times.append([totim,kstp,kper,current_position])
-        times = numpy.array( times )
+        times = np.array( times )
         return times
 #           
 #        self.skip = True
@@ -1138,7 +1149,7 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
 #                    times.append([totim,kstp,kper,current_position])
 #            else: 
 #                self.file.seek(0)
-#                times = numpy.array( times )
+#                times = np.array( times )
 #                self.skip = False
 #                return times
 
@@ -1148,7 +1159,7 @@ class MODFLOW_CBB(MFReadBinaryStatements,MF_Discretization):
         if success == True:
             return self.flux,totim,True
         else:
-            return numpy.empty((self.nlay,self.nrow,self.ncol)),0.,False
+            return np.empty((self.nlay,self.nrow,self.ncol)),0.,False
 
     
 class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
@@ -1156,7 +1167,7 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
     def __init__(self,nlay,nrow,ncol,filename,verbose=False):
         #initialize grid information
         self.assign_rowcollay(nlay,nrow,ncol)
-        self.h = numpy.zeros((self.nlay, self.nrow, self.ncol),dtype='float')+1.0E+32
+        self.h = np.zeros((self.nlay, self.nrow, self.ncol),dtype='float')+1.0E+32
         self.verbose = verbose
         #open binary head file
         self.file=open(filename,'rb')
@@ -1179,7 +1190,7 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
         if success == True:        
             return totim,kstp,kper,h,True
         else:
-            return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
+            return 0.0,0,0,np.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
 
 
     def read_header(self):
@@ -1229,7 +1240,7 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
             else: 
                 sys.stdout.write('\n')
                 self.file.seek(0)
-                times = numpy.array( times )
+                times = np.array( times )
                 return times
 
     def next(self):
@@ -1242,7 +1253,7 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
          else:
              if self.verbose == True:
                 print 'MT3DMS_Concentration object.read_next_heads() reached end of file.'
-             return 0., numpy.zeros((self.nlay, self.nrow, self.ncol),dtype='float')+1.0E+32, 0,0,False
+             return 0., np.zeros((self.nlay, self.nrow, self.ncol),dtype='float')+1.0E+32, 0,0,False
      #print 'MT3DMS concentration read (ntrans,kstp,kper,time): ',NTRANS,KSTP,KPER,TOTIM 
      self.kper = KPER
      self.ntrans = NTRANS
@@ -1260,7 +1271,7 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
     				if kstp == kkspt and kkper == kper:
     					return totim,kstp,kper,concen,True
     			else:
-    				return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
+    				return 0.0,0,0,np.zeros((self.nlay,self.nrow,self,ncol),dtype='float')+1.0E+32,False 
     	except:
     		target_totim = args[0]
     		while True:
@@ -1269,7 +1280,7 @@ class MT3D_Concentration(MFReadBinaryStatements,MF_Discretization):
     				if target_totim == totim:
     					return totim,kstp,kper,concen,True
     			else:
-    				return 0.0,0,0,numpy.zeros((self.nlay,self.nrow,self.ncol),dtype='float')+1.0E+32,False
+    				return 0.0,0,0,np.zeros((self.nlay,self.nrow,self.ncol),dtype='float')+1.0E+32,False
     			
 
 class MODFLOW_HYDMOD(MFReadBinaryStatements):
@@ -1290,7 +1301,7 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
         if self.nhydtot < 0:
             self.double = True
             self.nhydtot = abs( self.nhydtot )
-        self.v = numpy.empty((self.nhydtot),dtype='float')
+        self.v = np.empty((self.nhydtot),dtype='float')
         self.v.fill(1.0E+32)
         ctime = self.read_hyd_text(nchar=4)
         #--read HYDLBL
@@ -1299,7 +1310,7 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
         for idx in xrange(0,self.nhydtot):
             cid = self.read_hyd_text()
             hydlbl.append( cid )
-        self.hydlbl = numpy.array( hydlbl )
+        self.hydlbl = np.array( hydlbl )
         if self.verbose == True:
             print self.hydlbl
         if not slurp:
@@ -1333,7 +1344,7 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
                 times.append([totim,current_position])
             else: 
                 self.file.seek(self.datastart)
-                times = numpy.array( times )
+                times = np.array( times )
                 self.skip = False
                 return times
 
@@ -1343,14 +1354,14 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
 
     def slurp(self):
         if self.double:
-            float_type = numpy.float64
+            float_type = np.float64
         else:
-            float_type = numpy.float32
+            float_type = np.float32
         dtype_list = [('totim',float_type)]
         for site in self.hydlbl:
             dtype_list.append((site[6:].strip(),float_type))
-        dtype = numpy.dtype(dtype_list)
-        data = numpy.fromfile(self.file,dtype,count=-1)
+        dtype = np.dtype(dtype_list)
+        data = np.fromfile(self.file,dtype,count=-1)
         return data        
 
     def read_header(self):
@@ -1406,7 +1417,7 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
                     break
             if idx == -1:
                 print 'Error: HYDMOD observation record {0} not found'.format( record.strip().lower() )
-        gage_record = numpy.zeros((2))#tottime plus observation
+        gage_record = np.zeros((2))#tottime plus observation
         if idx != -1 and idx < self.nhydtot:
             #--find offset to position
             ilen = self.get_point_offset(idx)
@@ -1417,11 +1428,11 @@ class MODFLOW_HYDMOD(MFReadBinaryStatements):
                     v=float(self.read_double())
                 else:
                     v=self.read_real()
-                this_entry = numpy.array([float(time_data[0])])
-                this_entry = numpy.hstack((this_entry,v))
-                gage_record = numpy.vstack((gage_record,this_entry))
+                this_entry = np.array([float(time_data[0])])
+                this_entry = np.hstack((this_entry,v))
+                gage_record = np.vstack((gage_record,this_entry))
             #delete the first 'zeros' element
-            gage_record = numpy.delete(gage_record,0,axis=0)
+            gage_record = np.delete(gage_record,0,axis=0)
         return gage_record
 
     def get_point_offset(self,ipos):
