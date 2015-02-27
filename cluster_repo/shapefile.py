@@ -179,6 +179,20 @@ def buildShapefileSelection(shapes,records,cid=None,tag=None):
             ys.append(y)
         sel.append(np.array([xs,ys]))
     return (sel)
+    
+"""
+ function to create a polyline shapefile from 
+ a matplotlib contour object 
+"""
+def mplcontour_shapefile(mplcontour, fname):
+    w = Writer(POLYLINE)
+    w.field('CONTOUR','F',10,5)
+    for idx, cp in enumerate(mplcontour.collections):
+        paths =  cp.get_paths()
+        for p in paths:
+            w.poly(parts=[p.vertices], shapeType=POLYLINE)
+            w.record([mplcontour._levels[idx]])
+    w.save(fname)            
 
 
 class _Array(array.array):
