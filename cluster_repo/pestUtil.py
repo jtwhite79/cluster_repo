@@ -40,7 +40,7 @@ def load_wrapped_format(nrow,ncol,filename):
 			try:
 				data[d] = float(a)
 			except:
-				print 'error casting to float on line: ',line
+				print('error casting to float on line: ',line)
 				sys.exit()
 			if d == (nrow*ncol)-1:
 				assert len(data) == (nrow*ncol)
@@ -112,7 +112,7 @@ def gslib_2_smp(fname,out_ftype='.dat',xname='X',yname='Y'):
                 d_idx.append(i)
     #--remove duplicates
     for i in d_idx[::-1]:
-        for pname in props.keys():
+        for pname in list(props.keys()):
             props[pname].pop(i)
 
                 
@@ -120,7 +120,7 @@ def gslib_2_smp(fname,out_ftype='.dat',xname='X',yname='Y'):
     ylist = props.pop(yname)            
     zonelist = np.ones(len(xlist))
     namelist = ['point'+str(i+1) for i in range(len(xlist))]
-    for pname,plist in props.iteritems():
+    for pname,plist in props.items():
         fname = title+'_'+pname+'.smp'
         write_coords(fname,namelist,xlist,ylist,zonelist,plist)
 
@@ -188,7 +188,7 @@ class smp():
         '''looks for multiple entries on the same day and averages them
         '''
         assert self.pandas is False, 'to use make_unique, records must not be loaded as pandas objects'
-        for site,record in self.records.iteritems():
+        for site,record in self.records.items():
             unique_dates = np.unique(record[:,0])
             if unique_dates.shape[0] != record.shape[0]:
                 unique = []                
@@ -196,7 +196,7 @@ class smp():
                     vals = record[np.where(record[:,0]==udt),1]
                     unique.append([udt,np.mean(vals)])                    
                 self.records[site] = np.array(unique)
-                print
+                print()
 
 
     def merge(self,other,how='average'):
@@ -204,8 +204,8 @@ class smp():
            for places where the data overlap, use how
            how = average,left,right
         '''
-        for site,record in self.records.iteritems():
-            if site in other.records.keys():
+        for site,record in self.records.items():
+            if site in list(other.records.keys()):
                 other_record = other.records[site]
                                 
                 for other_dt,other_val in other_record:
@@ -228,7 +228,7 @@ class smp():
     def plot(self,plt_name):
         fig = pylab.figure()
         ax = pylab.subplot(111)
-        for site,record in self.records.iteritems():
+        for site,record in self.records.items():
             ax.plot(record[:,0],record[:,1],label=site)
         ax.grid()
         ax.legend()
@@ -299,13 +299,13 @@ class smp():
                 if line.strip() == '':
                     break                             
                 pline = self.parse_line(line)
-                if pline[self.site_index] not in records.keys():
+                if pline[self.site_index] not in list(records.keys()):
                     records[pline[0]] = [pline[1:]]
                 else:
                     records[pline[0]].append(pline[1:])                
             f.close()
             #--cast each site record to a numpy array
-            for site,record in records.iteritems():
+            for site,record in records.items():
                 records[site] = np.array(record)
             if self.pandas:
                 return self.records2dataframe(records)
@@ -316,7 +316,7 @@ class smp():
         ''' to cast the dict records to a pandas dataframe
         '''
         #--use the first record as the seed for the dataframe        
-        sites = records.keys()
+        sites = list(records.keys())
         if sites:
             dfs = []
             #r1 = records[sites[0]]        
@@ -346,7 +346,7 @@ class smp():
             return slice2.index.tolist(),slice2.values.tolist()
         else:
             active_list = [[],[]]
-            for site,record in self.records.iteritems():
+            for site,record in self.records.items():
                 act = record[np.where(record[:,0]==dt)]                                    
                 if act.shape[0] > 0:                
                     active_list[0].append(site)
@@ -363,9 +363,9 @@ class smp():
             except:
                 raise IndexError('site '+str(findsite)+' not found in self.records')                   
         else:           
-            if findsite not in self.records.keys():
+            if findsite not in list(self.records.keys()):
                 raise IndexError('site '+str(findsite)+' not found in self.records')                   
-            for site,record in self.records.iteritems():
+            for site,record in self.records.items():
                 if site == findsite:                
                     d = record[:,0].tolist()
                     v = record[:,1].tolist()                            
@@ -402,7 +402,7 @@ class smp():
                         rec.append([dt,val])
                 self.records[site_name] = np.array(rec)
             else:
-                for site,record in self.records.iteritems():
+                for site,record in self.records.items():
                     rec = []
                     for dt,val in record:
                         if dt >=start and dt <=end:
@@ -440,7 +440,7 @@ class smp():
         if site_name.upper() == 'ALL':
             start_dict = {}
             end_dict = {}
-            for site,record in self.records.iteritems():
+            for site,record in self.records.items():
                 start,end = datetime(year=2200,month=1,day=1),datetime(year=1,month=1,day=1)        
                 for dt,val in record:
                     if dt < start and dt >= startmin:
@@ -462,7 +462,7 @@ class smp():
                         end = dt
                 return start,end
             else:
-                for site,record in self.records.iteritems():
+                for site,record in self.records.items():
                     for dt,val in record:
                         if dt < start and dt >= startmin:
                             start = dt
@@ -486,7 +486,7 @@ class smp():
         '''        
         raw = line.strip().split() 
         if len(raw) != 4:
-            print raw
+            print(raw)
         site = raw[self.site_index]
         if self.lower:
             site = site.lower()
@@ -501,7 +501,7 @@ class smp():
             last = f.tell()
             line = f.readline()
             if line.strip() == '':
-                raise IndexError,'value ',+str(value)+' not found in column '+str(line_index)
+                raise IndexError('value ').with_traceback(+str(value)+' not found in column '+str(line_index))
             line = self.parse_line(line)
             if line[line_index] == value:
                 f.seek(last)
@@ -525,7 +525,7 @@ class smp():
     def save(self,fname,dropna=False):
         if len(self.records) > 0:
             f = open(fname,'w')
-            for site,data in self.records.iteritems():
+            for site,data in self.records.items():
                 if self.pandas:                                        
                     if dropna:
                         data = data.dropna()
@@ -551,7 +551,7 @@ def write_structure_from_dict(file_name,structure_name,s_dict):
     s_dict.pop('STRUCTNAME')
     f_out.write(' NUGGET '+s_dict['NUGGET']+'\n')
     s_dict.pop('NUGGET')
-    if 'TRANSFORM' in s_dict.keys():
+    if 'TRANSFORM' in list(s_dict.keys()):
         f_out.write(' TRANSFORM '+s_dict['TRANSFORM']+'\n')
         s_dict.pop('TRANSFORM')
     else:
@@ -560,7 +560,7 @@ def write_structure_from_dict(file_name,structure_name,s_dict):
     s_dict.pop('NUMVARIOGRAM')
     
     vario_strings = []
-    for v_name,v_dict in s_dict.iteritems():
+    for v_name,v_dict in s_dict.items():
         f_out.write(' VARIOGRAM '+v_name+' '+v_dict['CONTRIBUTION']+'\n')
         vario_strings.append(write_vario(v_dict))
 
@@ -1049,18 +1049,18 @@ def load_jco(file_name,nespar=None,nobs=None):
     itemp1,itemp2,icount = np.fromfile(f,header_dt,1)[0]
     
     if itemp1 >= 0:
-        raise TypeError, 'Jco produced by deprecated version of PEST,'+\
-                         'Use JCOTRANS to convert to new format'
+        raise TypeError('Jco produced by deprecated version of PEST,'+\
+                         'Use JCOTRANS to convert to new format')
     
     #--error checking if desired
     if nespar is not None:
         if abs(itemp1) != nespar:
-            raise ValueError,'nespar value not equal to jco dimensions'\
-                             +str(nespar)+' '+str(abs(itemp1))
+            raise ValueError('nespar value not equal to jco dimensions'\
+                             +str(nespar)+' '+str(abs(itemp1)))
     if nobs is not None:
         if abs(itemp2) != nobs:
-            raise ValueError,'nobs value not equal to jco dimensions'\
-                             +str(nobs)+' '+str(abs(itemp2))
+            raise ValueError('nobs value not equal to jco dimensions'\
+                             +str(nobs)+' '+str(abs(itemp2)))
    
     nespar,nobs = abs(itemp1),abs(itemp2)                                  
     x = np.zeros((nobs,nespar))    

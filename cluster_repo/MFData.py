@@ -3,7 +3,7 @@ import sys
 import os
 import math
 import numpy as np
-from MFInterpolators import bilinear_interpolation
+from .MFInterpolators import bilinear_interpolation
 
 #import MFArrayUtil as au
 
@@ -51,9 +51,9 @@ def load_dis_file(file):
                 yoff = float(raw[1])
                 rotation = float(raw[2])
                 offset = [xoff,yoff,rotation]
-                print 'x-offset = %g y-offset = %g rotation = %g\n' % (xoff,yoff,rotation)
+                print('x-offset = %g y-offset = %g rotation = %g\n' % (xoff,yoff,rotation))
             except:
-                print 'offset not found in dis file header...continuing'
+                print('offset not found in dis file header...continuing')
                 offset = [-999,-999]
     
     #--parse the first line
@@ -65,7 +65,7 @@ def load_dis_file(file):
     itmuni = int(raw[4])
     lenunit = int(raw[5])  
     
-    print 'nlay = {0:3d} nrow = {1:3d}, ncol = {2:3d}'.format(nlay,nrow,ncol) 
+    print('nlay = {0:3d} nrow = {1:3d}, ncol = {2:3d}'.format(nlay,nrow,ncol)) 
     
     #--parse the laycbd line
     line = f.readline()
@@ -199,7 +199,7 @@ def makeCellEdgePointsAlongLine(x,y,xedge,yedge,returnVertices=False):
     pts = []
     npts = len(x)
     dlen = 0.
-    for idx in xrange(1,npts):
+    for idx in range(1,npts):
         x0 = x[idx-1]
         x1 = x[idx]
         y0 = y[idx-1]
@@ -281,7 +281,7 @@ def makeEqualSpacePointsAlongLine(pt_dist,x,y):
     npts = len(x)
     dlen = 0.
     remainder = 0.
-    for idx in xrange(1,npts):
+    for idx in range(1,npts):
         x0 = x[idx-1]
         x1 = x[idx]
         y0 = y[idx-1]
@@ -340,8 +340,8 @@ def bilinearInterpToPoints(x,y,vindex,xcell,ycell,vdata):
                 break
         if irow >= 0 and jcol >= 0:
             d = []
-            for iy in xrange(irow,irow+2):
-                for jx in xrange(jcol,jcol+2):
+            for iy in range(irow,irow+2):
+                for jx in range(jcol,jcol+2):
                     t = [ xcell[jx], ycell[iy], vdata[iy,jx] ]
                     d.append( t )
             vinterp.append( [vit, bilinear_interpolation( xt, yt, d )] )

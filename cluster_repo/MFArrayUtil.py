@@ -83,13 +83,13 @@ def loadArrayFromFile(nrow,ncol,file,ctype=None):
     d = 0
     while True:
         line = file_in.readline()
-        if line is None or d == nrow*ncol:break
+        if line is None or d == nrow*ncol: break
         raw = line.strip('\n').split()
         for a in raw:
             try:
                 data[d] = float(a)
             except:
-                print 'error casting to float on line: ',line
+                print('error casting to float on line: ',line)
                 sys.exit()
             if d == (nrow*ncol)-1:
                 assert len(data) == (nrow*ncol)
@@ -158,7 +158,7 @@ def loadSurferGrdFromFile(file):
         ncol = int( raw[0] )
         nrow = int( raw[1] )
     except:
-        print 'error parsing ncol and nrow on line:\n  ',line
+        print('error parsing ncol and nrow on line:\n  ',line)
         sys.exit()
     line = file_in.readline()  #xmin xmax
     raw = line.split()
@@ -166,7 +166,7 @@ def loadSurferGrdFromFile(file):
         xmin = float( raw[0] )
         xmax = float( raw[1] )
     except:
-        print 'error parsing xmin and xmax on line:\n  ',line
+        print('error parsing xmin and xmax on line:\n  ',line)
         sys.exit()
     line = file_in.readline()  #ymin ymax
     raw = line.split()
@@ -174,7 +174,7 @@ def loadSurferGrdFromFile(file):
         ymin = float( raw[0] )
         ymax = float( raw[1] )
     except:
-        print 'error parsing ymin and ymax on line:\n  ',line
+        print('error parsing ymin and ymax on line:\n  ',line)
         sys.exit()
     line = file_in.readline()  #zmin zmax
     raw = line.split()
@@ -182,7 +182,7 @@ def loadSurferGrdFromFile(file):
         zmin = float( raw[0] )
         zmax = float( raw[1] )
     except:
-        print 'error parsing zmin and zmax on line:\n  ',line
+        print('error parsing zmin and zmax on line:\n  ',line)
         sys.exit()
     
     #calculate cell size and offset
@@ -203,7 +203,7 @@ def loadSurferGrdFromFile(file):
             try:
                 data[d] = float(a)
             except:
-                print 'error casting to float on line: ',line
+                print('error casting to float on line: ',line)
                 sys.exit()
             if d == (nrow*ncol)-1:
                 assert len(data) == (nrow*ncol)
@@ -289,7 +289,7 @@ def writeArrayToFile(array,file,**kwargs):
             try:
                 file_out.write(oFormat.format(float(array[a][b])))
             except:
-                print 'NAN at row,col: ',a,b,array[a][b]
+                print('NAN at row,col: ',a,b,array[a][b])
                 sys.exit()
             if (b+1)%nWriteCol == 0.0 and b != 0:
                 file_out.write('\n')
@@ -338,7 +338,7 @@ def plotArray(array,rowDim,colDim,**kwargs):
         vmin = kwargs['vmin']
     except:
         vmin = np.min(array)
-    print 'min,max',vmin,vmax
+    print('min,max',vmin,vmax)
     try:
         figuresize = kwargs['figuresize']
     except:
@@ -451,7 +451,7 @@ def plotArray(array,rowDim,colDim,**kwargs):
                     try:
                         array[i,j] = math.log10( array[i,j] )
                     except:
-                        print i,j,array[i,j]
+                        print(i,j,array[i,j])
                         return
         if con_len > 0:
             for i in range(0,con_len):
@@ -474,7 +474,7 @@ def plotArray(array,rowDim,colDim,**kwargs):
             cbticks = np.arange(vmin,vmax+0.1,1)
             if cbticks[len(cbticks)-1] != vmax:
                 cbticks = np.append( cbticks, vmax )
-        print 'revised min,max',vmin,vmax
+        print('revised min,max',vmin,vmax)
 
     #--set x and y dimensions       
     try:
@@ -516,10 +516,10 @@ def plotArray(array,rowDim,colDim,**kwargs):
     #--set x and y dimensions at cell centers, if necessary
     if con_len > 0:
         xcell = np.zeros( (ncol), np.float )
-        for i in xrange(0,ncol):
+        for i in range(0,ncol):
             xcell[i] = 0.5 * ( x[i] + x[i+1] )
         ycell = np.zeros( (nrow), np.float )
-        for i in xrange(0,nrow):
+        for i in range(0,nrow):
             ycell[i] = 0.5 * ( y[i] + y[i+1] )
                 
     #array = np.flipud(array)
@@ -630,7 +630,7 @@ def plotArray(array,rowDim,colDim,**kwargs):
             fmt = outputFlag.split('.')[-1]
         
         except:
-            print 'unable to parse outputFlag for output format type: ',outputFlag
+            print('unable to parse outputFlag for output format type: ',outputFlag)
         fig.savefig(outputFlag,orientation='portrait',format=fmt,dpi=150)
     c = []
     mpl.pyplot.close('all')

@@ -118,7 +118,7 @@ def load_as_dict(shape_name,attrib_name_list=None,loadShapes=True):
             attrib_names.append(item[0])
         for a_name in attrib_name_list:
                 if a_name not in attrib_names:
-                    raise IndexError,'shapefile has no attribute named '+str(a_name)
+                    raise IndexError('shapefile has no attribute named '+str(a_name))
                 else:
                     attrib_idx[a_name] = attrib_names.index(a_name)                        
     #--get shapes
@@ -127,19 +127,19 @@ def load_as_dict(shape_name,attrib_name_list=None,loadShapes=True):
     #--seed records dict with empty lists
     records = {}
     rec_type = {}
-    for a_name,a_idx in attrib_idx.iteritems():
+    for a_name,a_idx in attrib_idx.items():
         records[a_name] = []
         rec_type[a_name] = header[a_idx][1]
     #--loop over each record, extracting the requested attributes
     for i in range(shp.numRecords):
         rec = shp.record(i)
-        for a_name,a_idx in attrib_idx.iteritems():
+        for a_name,a_idx in attrib_idx.items():
             records[a_name].append(rec[a_idx])
     
 
 
     #--cast records to numpy arrays
-    for a_name,a_list in records.iteritems():
+    for a_name,a_list in records.items():
         if rec_type[a_name].upper() != 'C':
             a = np.array(a_list) 
         else:
@@ -165,7 +165,7 @@ def buildShapefileSelection(shapes,records,cid=None,tag=None):
     sel = []
     gis_items = len( shapes )
     #print gis_items,cid
-    for idx in xrange(0,gis_items):
+    for idx in range(0,gis_items):
         if cid is not None:
             on_tag = records[cid][idx]
             #print on_tag
@@ -264,15 +264,15 @@ class Reader:
             (shapeName, ext) = os.path.splitext(shapefile)
             self.shapeName = shapeName
             try:
-                self.shp = file("%s.shp" % shapeName, "rb")
+                self.shp = open("{}.shp".format(shapeName), "rb")
                 self.__shpHeader()
             except IOError: pass
             try:
-                self.shx = file("%s.shx" % shapeName, "rb")
+                self.shx = open("{}.shx".format(shapeName), "rb")
             #       self.__shapeIndex()
             except IOError: pass
             try:
-                self.dbf = file("%s.dbf" % shapeName, "rb")
+                self.dbf = open("{}.dbf".format(shapeName), "rb")
                 self.__dbfHeader()
             except IOError: pass
 
@@ -290,7 +290,7 @@ class Reader:
             max = self.numRecords - 1
             if abs(i) > max:
                 raise IndexError("Shape or Record index out of range.")
-            if i < 0: i = range(self.numRecords)[i]
+            if i < 0: i = list(range(self.numRecords))[i]
         return i
 
     def __shpHeader(self):
@@ -500,7 +500,7 @@ class Reader:
         records = []
         f = self.__getFileObj(self.dbf)
         f.seek(self.__dbfHeaderLength())
-        for i in xrange(self.numRecords):
+        for i in range(self.numRecords):
             r = self.__record()
             if r:
                 records.append(r)
@@ -901,7 +901,7 @@ class Writer:
                 record.append(recordList[0][i])
         elif recordDict:
             for field in self.fields:
-                if recordDict.has_key(field[0]):
+                if field[0] in recordDict:
                     val = recordDict[field[0]]
                     if val:
                         record.append(val)
@@ -960,7 +960,7 @@ class Editor(Writer):
         self.autoBalance = autoBalance
         if not shapefile:
             Writer.__init__(self, shapeType)
-        elif isinstance(shapefile, basestring):
+        elif isinstance(shapefile, str):
             base = os.path.splitext(shapefile)[0]
             if os.path.isfile("%s.shp" % base):
                 r = Reader(base)
