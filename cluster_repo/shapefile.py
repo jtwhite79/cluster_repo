@@ -443,6 +443,13 @@ class Reader:
         if self.dbf:
             self.__dbfHeader()
 
+    def dbfHeader(self):		
+        f = self.__getFileObj(self.dbf)		
+        if not self.numRecords:
+            self.__dbfHeader()		
+        return self.fields[1:]
+            
+            
     def __getFileObj(self, f):
         """Checks to see if the requested shapefile file object is
         available. If not a ShapefileException is raised."""
