@@ -117,10 +117,18 @@ class MFReadBinaryStatements:
     def read_text(self):
         #textvalue=strct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
         textvalue=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=16).tostring()
+        if not isinstance(textvalue, str):
+            textvalue = textvalue.decode().strip()
+        else:
+            textvalue = textvalue.strip()
         return textvalue
     def read_hyd_text(self,nchar=20):
         #textvalue=strct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
         textvalue=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=nchar).tostring()
+        if not isinstance(textvalue, str):
+            textvalue = textvalue.decode().strip()
+        else:
+            textvalue = textvalue.strip()
         return textvalue
     def read_3drealarray(self):
         x=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.real, count=self.nlay*self.nrow*self.ncol)
