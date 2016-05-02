@@ -63,10 +63,18 @@ class SWRReadBinaryStatements:
     def read_text(self):
         #textvalue=strct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
         textvalue=np.fromfile(file = self.file, dtype=SWRReadBinaryStatements.character, count=16).tostring()
+        if not isinstance(textvalue, str):
+            textvalue = textvalue.decode().strip()
+        else:
+            textvalue = textvalue.strip()
         return textvalue
     def read_obs_text(self,nchar=20):
         #textvalue=strct.unpack('cccccccccccccccc',self.file.read(16*self.textbyte))
         textvalue=np.fromfile(file = self.file, dtype=MFReadBinaryStatements.character, count=nchar).tostring()
+        if not isinstance(textvalue, str):
+            textvalue = textvalue.decode().strip()
+        else:
+            textvalue = textvalue.strip()
         return textvalue
     def read_record(self):
 #        x = np.fromfile(file=self.file,dtype=SWRReadBinaryStatements.real,count=self.nrecord*self.items)
